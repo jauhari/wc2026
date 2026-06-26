@@ -2,6 +2,7 @@ import Link from "next/link"
 import { notFound } from "next/navigation"
 import { ArrowLeftIcon, MapPinIcon, TrophyIcon } from "lucide-react"
 
+import { CountryFlag } from "@/components/country-flag"
 import {
   getTournamentData,
   getTeam,
@@ -70,7 +71,7 @@ export default async function TeamDetailPage({
 
       <Card className="overflow-hidden">
         <CardContent className="flex flex-col gap-4 p-5 sm:flex-row sm:items-center">
-          <span className="text-6xl leading-none">{team.flag}</span>
+          <CountryFlag code={team.flag} size="3xl" title={team.name} className="rounded-md shadow-md" />
           <div className="flex flex-1 flex-col gap-1">
             <div className="flex flex-wrap items-center gap-2">
               <h1 className="text-2xl font-bold tracking-tight">{team.name}</h1>
@@ -128,7 +129,7 @@ export default async function TeamDetailPage({
                 >
                   <div className="flex min-w-0 flex-1 items-center gap-2">
                     <span className="text-muted-foreground">{isHome ? "vs" : "@"}</span>
-                    <span className="text-lg">{opp.flag}</span>
+                    <CountryFlag code={opp.flag} size="md" title={opp.name} />
                     <span className="truncate text-sm font-medium">{opp.shortName}</span>
                   </div>
                   <div className="flex items-center gap-2">
@@ -188,7 +189,7 @@ export default async function TeamDetailPage({
                       </TableCell>
                       <TableCell className="font-medium">
                         <span className="flex items-center gap-2">
-                          <span>{t.flag}</span>
+                          <CountryFlag code={t.flag} size="xs" title={t.name} />
                           {t.shortName}
                           {isMe && (
                             <Badge variant="secondary" className="text-[10px]">

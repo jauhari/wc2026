@@ -2,6 +2,7 @@ import Link from "next/link"
 import { notFound } from "next/navigation"
 import { ArrowLeftIcon, MapPinIcon, GoalIcon } from "lucide-react"
 
+import { CountryFlag } from "@/components/country-flag"
 import { getTournamentData, getTeam, getStadium } from "@/lib/data/tournament"
 import { formatKickoff, formatDate, stageLabel } from "@/lib/data/queries"
 import { cn } from "@/lib/utils"
@@ -128,7 +129,7 @@ function TeamBlock({
         align === "end" ? "items-end text-right" : "items-start text-left"
       )}
     >
-      <span className="text-5xl">{team.flag}</span>
+      <CountryFlag code={team.flag} size="3xl" title={team.name} className="rounded-md shadow-lg" />
       <span className={cn("text-lg font-bold", won && "text-primary")}>{team.name}</span>
       <Badge variant="outline" className="font-mono">
         {team.code}
@@ -156,8 +157,9 @@ function GoalList({
   }
   return (
     <div className="flex flex-col gap-2">
-      <span className="font-semibold">
-        {team.flag} {team.shortName}
+      <span className="flex items-center gap-2 font-semibold">
+        <CountryFlag code={team.flag} size="sm" title={team.name} />
+        {team.shortName}
       </span>
       <ul className="flex flex-col gap-1 text-sm">
         {goals.map((g, i) => (

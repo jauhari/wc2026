@@ -89,8 +89,8 @@ function buildTeam(name: string, group: GroupId | null): Team {
         ? (meta?.code ?? name.slice(0, 12))
         : name,
     code: meta?.code ?? name.slice(0, 3).toUpperCase(),
-    flag: meta?.flag ?? "🏳️",
-    group: group ?? "A",
+    flag: meta?.flag ?? "tbd",
+    group: group ?? "A", // only used for real teams; placeholders excluded from standings
     pot: 3,
     titles: meta?.titles ?? 0,
     confederation: meta?.confederation ?? "TBD",
@@ -162,8 +162,9 @@ function computeStandings(matches: Match[], teams: Team[]): Record<GroupId, Stan
     }
   }
 
-  // Ensure all group teams appear even with 0 played
+  // Ensure all real group teams appear (skip knockout placeholders like 1F, W73)
   for (const t of teams) {
+    if (isPlaceholderTeam(t.name)) continue
     rows[t.group][t.id] ??= emptyStanding(t.id)
   }
 
@@ -358,8 +359,10 @@ function transform(
     .filter((m) => m.status !== "scheduled")
     .reduce((s, m) => s + (m.homeScore ?? 0) + (m.awayScore ?? 0), 0)
 
+  const realTeams = teams.filter((t) => !isPlaceholderTeam(t.name))
+
   return {
-    teams,
+    teams: realTeams,
     teamMap,
     stadiums,
     stadiumMap,

@@ -20,7 +20,7 @@ export interface Team {
   shortName: string
   /** ISO-style trigram, e.g. "BRA" */
   code: string
-  /** Flag emoji */
+  /** flagcdn.com slug, e.g. "br", "gb-eng" */
   flag: string
   group: GroupId
   /** Pot the team was drawn from (1 = top seeds) */

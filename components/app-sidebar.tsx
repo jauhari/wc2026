@@ -5,6 +5,7 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { TrophyIcon } from "lucide-react"
 
+import { CountryFlag } from "@/components/country-flag"
 import { navItems } from "@/lib/nav"
 import { hostNations } from "@/lib/data/stadiums"
 import {
@@ -85,7 +86,7 @@ export function AppSidebar() {
                   key={n.code}
                   className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm"
                 >
-                  <span className="text-lg leading-none">{n.flag}</span>
+                  <CountryFlag code={n.flag} size="sm" title={n.name} />
                   <span className="text-sidebar-foreground/80">{n.name}</span>
                 </div>
               ))}

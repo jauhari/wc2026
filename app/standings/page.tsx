@@ -1,5 +1,7 @@
 import Link from "next/link"
 
+import { CountryFlag } from "@/components/country-flag"
+
 import { GROUPS } from "@/lib/data/meta"
 import { getTournamentData, getGroupStandings } from "@/lib/data/tournament"
 import type { GroupId, StandingRow, Team } from "@/lib/types"
@@ -72,12 +74,12 @@ function GroupCard({
           <TableHeader>
             <TableRow className="hover:bg-transparent">
               <TableHead className="h-8 pl-4 text-xs">Tim</TableHead>
-              <TableHead className="h-8 text-center text-xs">M</TableHead>
-              <TableHead className="h-8 text-center text-xs">M</TableHead>
-              <TableHead className="h-8 text-center text-xs">S</TableHead>
-              <TableHead className="h-8 text-center text-xs">K</TableHead>
-              <TableHead className="h-8 text-center text-xs">GD</TableHead>
-              <TableHead className="h-8 pr-4 text-center text-xs">Pts</TableHead>
+              <TableHead className="h-8 w-8 text-center text-xs" title="Main">MP</TableHead>
+              <TableHead className="h-8 w-8 text-center text-xs text-primary" title="Menang">W</TableHead>
+              <TableHead className="h-8 w-8 text-center text-xs" title="Seri">D</TableHead>
+              <TableHead className="h-8 w-8 text-center text-xs text-destructive" title="Kalah">L</TableHead>
+              <TableHead className="h-8 w-10 text-center text-xs" title="Selisih Gol">GD</TableHead>
+              <TableHead className="h-8 w-10 pr-4 text-center text-xs" title="Poin">Pts</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -89,6 +91,13 @@ function GroupCard({
                 team={teamMap[row.teamId]}
               />
             ))}
+            {rows.length === 0 && (
+              <TableRow>
+                <TableCell colSpan={7} className="py-6 text-center text-sm text-muted-foreground">
+                  Belum ada data klasemen
+                </TableCell>
+              </TableRow>
+            )}
           </TableBody>
         </Table>
         <Legend />
@@ -108,6 +117,8 @@ function StandingRowComponent({
 }) {
   const qualifies = position <= 2
 
+  if (!team) return null
+
   return (
     <TableRow>
       <TableCell className="py-2 pl-4">
@@ -125,7 +136,7 @@ function StandingRowComponent({
           >
             {position}
           </span>
-          <span className="text-base leading-none">{team.flag}</span>
+          <CountryFlag code={team.flag} size="sm" title={team.name} />
           <span className="truncate font-medium">{team.shortName}</span>
         </Link>
       </TableCell>
@@ -160,7 +171,7 @@ function Legend() {
         <span className="size-2 rounded-full bg-accent" />
         Peringkat ketiga (terbaik 8)
       </span>
-      <span>M=Main · M=Menang · S=Seri · K=Kalah</span>
+      <span>MP=Main · W=Menang · D=Seri · L=Kalah</span>
     </div>
   )
 }

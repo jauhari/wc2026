@@ -20,6 +20,12 @@ export const metadata = {
   title: "World Cup 2026 Monitor — WE ARE 26",
   description:
     "Pantau Piala Dunia 2026: hasil pertandingan, klasemen, jadwal, bagan, dan statistik. Tuan rumah USA, Kanada & Meksiko.",
+  applicationName: "WC 2026 Monitor",
+  appleWebApp: {
+    capable: true,
+    title: "WC 2026",
+    statusBarStyle: "default",
+  },
 }
 
 export default function RootLayout({

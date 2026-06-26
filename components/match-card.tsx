@@ -1,6 +1,7 @@
 import Link from "next/link"
 import { MapPinIcon } from "lucide-react"
 
+import { CountryFlag } from "@/components/country-flag"
 import type { Match, Stadium, Team } from "@/lib/types"
 import { formatKickoff, formatTime, stageLabel } from "@/lib/data/queries"
 import { cn } from "@/lib/utils"
@@ -60,17 +61,13 @@ export function MatchCard({
         <CardContent className={cn(compact ? "p-3" : "p-4")}>
           <div className="flex flex-col gap-1.5">
             <TeamRow
-              flag={home.flag}
-              name={home.shortName}
-              code={home.code}
+              team={home}
               score={match.homeScore}
               highlight={isFinished && homeWon}
               isLive={isLive}
             />
             <TeamRow
-              flag={away.flag}
-              name={away.shortName}
-              code={away.code}
+              team={away}
               score={match.awayScore}
               highlight={isFinished && awayWon}
               isLive={isLive}
@@ -89,16 +86,12 @@ export function MatchCard({
 }
 
 function TeamRow({
-  flag,
-  name,
-  code,
+  team,
   score,
   highlight,
   isLive,
 }: {
-  flag: string
-  name: string
-  code: string
+  team: Team
   score: number | null
   highlight: boolean
   isLive: boolean
@@ -106,16 +99,16 @@ function TeamRow({
   return (
     <div className="flex items-center justify-between gap-2 rounded-md px-1.5 py-1">
       <div className="flex min-w-0 items-center gap-2">
-        <span className="text-lg leading-none">{flag}</span>
+        <CountryFlag code={team.flag} size="md" title={team.name} />
         <span
           className={cn(
             "truncate text-sm",
             highlight ? "font-semibold text-foreground" : "text-foreground/90"
           )}
         >
-          {name}
+          {team.shortName}
         </span>
-        <span className="text-[10px] text-muted-foreground">{code}</span>
+        <span className="text-[10px] text-muted-foreground">{team.code}</span>
       </div>
       <span
         className={cn(

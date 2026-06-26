@@ -3,6 +3,7 @@
 import * as React from "react"
 import { CalendarDaysIcon } from "lucide-react"
 
+import { CountryFlag } from "@/components/country-flag"
 import type { Country, Match, Stadium, Team } from "@/lib/types"
 
 export interface EnrichedMatch {
@@ -55,7 +56,7 @@ export function ScheduleClient({
           <ToggleGroupItem value="ALL">Semua</ToggleGroupItem>
           {hostNations.map((n) => (
             <ToggleGroupItem key={n.code} value={n.code}>
-              <span className="mr-1">{n.flag}</span>
+              <CountryFlag code={n.flag} size="xs" className="mr-1" />
               {n.code}
             </ToggleGroupItem>
           ))}
@@ -118,8 +119,9 @@ function ScheduleRow({
         </div>
 
         <div className="flex flex-1 items-center justify-end gap-2">
-          <span className={cn("truncate text-sm", hasScore && !homeWon && "text-muted-foreground")}>
-            {home.flag} {home.shortName}
+          <span className={cn("flex items-center gap-1.5 truncate text-sm", hasScore && !homeWon && "text-muted-foreground")}>
+            <CountryFlag code={home.flag} size="sm" title={home.name} />
+            {home.shortName}
           </span>
         </div>
 
@@ -136,8 +138,9 @@ function ScheduleRow({
         </div>
 
         <div className="flex flex-1 items-center gap-2">
-          <span className={cn("truncate text-sm", hasScore && !awayWon && "text-muted-foreground")}>
-            {away.shortName} {away.flag}
+          <span className={cn("flex items-center gap-1.5 truncate text-sm", hasScore && !awayWon && "text-muted-foreground")}>
+            {away.shortName}
+            <CountryFlag code={away.flag} size="sm" title={away.name} />
           </span>
         </div>
 

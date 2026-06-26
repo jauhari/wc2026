@@ -1,4 +1,6 @@
 import Link from "next/link"
+
+import { CountryFlag } from "@/components/country-flag"
 import { TrophyIcon } from "lucide-react"
 
 import {
@@ -146,7 +148,7 @@ function BracketSide({
   const content = (
     <div className="flex items-center justify-between gap-2 rounded px-1 py-0.5">
       <span className="flex min-w-0 items-center gap-2">
-        <span className="text-base leading-none">{flag ?? "🏳️"}</span>
+        <CountryFlag code={flag ?? "tbd"} size="sm" title={name} />
         <span
           className={cn(
             "truncate text-sm",

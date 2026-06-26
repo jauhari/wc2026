@@ -3,6 +3,7 @@ import { TrophyIcon, GoalIcon, UsersIcon, CalendarDaysIcon, ArrowRightIcon, Flam
 
 import { getTournamentData, getTeam, getStadium } from "@/lib/data/tournament"
 import { hostNations } from "@/lib/data/stadiums"
+import { CountryFlag } from "@/components/country-flag"
 import { MatchCard } from "@/components/match-card"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
@@ -41,10 +42,17 @@ export default async function HomePage() {
               FIFA World Cup 2026
             </h1>
             <p className="max-w-lg text-primary-foreground/90">
-              Pantau seluruh turnamen — hasil, klasemen, jadwal, bagan, dan
-              statistik. Tuan rumah tiga negara:{" "}
-              {hostNations.map((n) => `${n.flag} ${n.name}`).join(", ")}.
+              Pantau seluruh turnamen — hasil, klasemen, jadwal, bagan, dan statistik.
+              Tuan rumah tiga negara:
             </p>
+            <div className="flex flex-wrap items-center gap-3">
+              {hostNations.map((n) => (
+                <span key={n.code} className="flex items-center gap-1.5 text-sm font-medium text-primary-foreground/95">
+                  <CountryFlag code={n.flag} size="md" title={n.name} ring={false} />
+                  {n.name}
+                </span>
+              ))}
+            </div>
             <div className="mt-2 flex flex-wrap gap-2">
               <Button asChild variant="secondary">
                 <Link href="/schedule">
@@ -170,8 +178,12 @@ export default async function HomePage() {
                   </Avatar>
                   <div className="flex flex-1 flex-col">
                     <span className="font-semibold">{topScorer.name}</span>
-                    <span className="flex items-center gap-1 text-xs text-muted-foreground">
-                      <span>{getTeam(data, topScorer.teamId).flag}</span>
+                    <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                      <CountryFlag
+                        code={getTeam(data, topScorer.teamId).flag}
+                        size="xs"
+                        title={getTeam(data, topScorer.teamId).name}
+                      />
                       {getTeam(data, topScorer.teamId).name}
                     </span>
                   </div>
@@ -202,7 +214,7 @@ export default async function HomePage() {
                   className="flex items-center justify-between rounded-lg border bg-card px-3 py-2"
                 >
                   <span className="flex items-center gap-2 font-medium">
-                    <span className="text-xl">{n.flag}</span>
+                    <CountryFlag code={n.flag} size="lg" title={n.name} />
                     {n.name}
                   </span>
                   <Badge variant="secondary">{n.code}</Badge>

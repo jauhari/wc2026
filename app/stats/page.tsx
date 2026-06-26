@@ -1,5 +1,6 @@
 import { GoalIcon, HandHelpingIcon } from "lucide-react"
 
+import { CountryFlag } from "@/components/country-flag"
 import { StatsChart } from "@/components/stats-chart"
 import { GROUPS } from "@/lib/data/meta"
 import { getTournamentData, getTeam } from "@/lib/data/tournament"
@@ -169,7 +170,7 @@ function PlayerTable({
                   </TableCell>
                   <TableCell>
                     <span className="flex items-center gap-1.5 text-sm">
-                      <span>{team.flag}</span>
+                      <CountryFlag code={team.flag} size="sm" title={team.name} />
                       {team.shortName}
                     </span>
                   </TableCell>

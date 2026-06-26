@@ -3,6 +3,7 @@
 import * as React from "react"
 import Link from "next/link"
 
+import { CountryFlag } from "@/components/country-flag"
 import type { GroupId, Team } from "@/lib/types"
 import { GROUPS } from "@/lib/data/meta"
 import { cn } from "@/lib/utils"
@@ -63,7 +64,7 @@ export function TeamsClient({ teams }: { teams: Team[] }) {
             <Link key={team.id} href={`/teams/${team.id}`}>
               <Card className="transition-colors hover:border-primary/50 hover:bg-muted/40">
                 <CardContent className="flex flex-col items-center gap-2 p-4 text-center">
-                  <span className="text-4xl leading-none">{team.flag}</span>
+                  <CountryFlag code={team.flag} size="3xl" title={team.name} ring />
                   <span className="font-semibold leading-tight">{team.shortName}</span>
                   <div className="flex flex-wrap items-center justify-center gap-1">
                     <Badge variant="outline" className="font-mono text-[10px]">
