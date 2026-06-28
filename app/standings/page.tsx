@@ -3,7 +3,7 @@ import Link from "next/link"
 import { CountryFlag } from "@/components/country-flag"
 
 import { GROUPS } from "@/lib/data/meta"
-import { getTournamentData, getGroupStandings } from "@/lib/data/tournament"
+import { getTournamentDataStaticSync, getGroupStandings } from "@/lib/data/tournament"
 import type { GroupId, StandingRow, Team } from "@/lib/types"
 import {
   Card,
@@ -29,10 +29,10 @@ export const metadata = quickPageMetadata({
   path: "/standings",
 })
 
-export const revalidate = 120
+export const dynamic = "force-static"
 
 export default async function StandingsPage() {
-  const data = await getTournamentData()
+  const data = getTournamentDataStaticSync()
 
   return (
     <div className="flex flex-col gap-5 p-4 md:p-6">

@@ -1,5 +1,5 @@
 import { MatchesClient } from "@/components/matches-client"
-import { getTournamentData } from "@/lib/data/tournament"
+import { getTournamentDataStaticSync } from "@/lib/data/tournament"
 import { enrichMatches } from "@/lib/enrich-matches"
 import { quickPageMetadata } from "@/lib/seo"
 
@@ -10,10 +10,10 @@ export const metadata = quickPageMetadata({
   path: "/matches",
 })
 
-export const revalidate = 120
+export const dynamic = "force-static"
 
 export default async function MatchesPage() {
-  const data = await getTournamentData()
+  const data = getTournamentDataStaticSync()
 
   return (
     <MatchesClient

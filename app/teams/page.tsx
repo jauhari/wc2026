@@ -1,5 +1,5 @@
 import { TeamsClient } from "@/components/teams-client"
-import { getTournamentData } from "@/lib/data/tournament"
+import { getTournamentDataStaticSync } from "@/lib/data/tournament"
 import { quickPageMetadata } from "@/lib/seo"
 
 export const metadata = quickPageMetadata({
@@ -9,9 +9,9 @@ export const metadata = quickPageMetadata({
   path: "/teams",
 })
 
-export const revalidate = 120
+export const dynamic = "force-static"
 
 export default async function TeamsPage() {
-  const data = await getTournamentData()
+  const data = getTournamentDataStaticSync()
   return <TeamsClient teams={data.teams} />
 }

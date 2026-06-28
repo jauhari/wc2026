@@ -2,7 +2,7 @@ import type { Metadata } from "next"
 import Link from "next/link"
 import { TrophyIcon, GoalIcon, UsersIcon, CalendarDaysIcon, ArrowRightIcon, FlameIcon } from "lucide-react"
 
-import { getTournamentData, getTeam } from "@/lib/data/tournament"
+import { getTournamentDataStaticSync, getTeam } from "@/lib/data/tournament"
 import { buildRootMetadata } from "@/lib/seo"
 import { enrichMatches } from "@/lib/enrich-matches"
 import { hostNations } from "@/lib/data/stadiums"
@@ -20,14 +20,14 @@ import {
 } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 
-export const revalidate = 120
+export const dynamic = "force-static"
 
 export async function generateMetadata(): Promise<Metadata> {
   return buildRootMetadata()
 }
 
 export default async function HomePage() {
-  const data = await getTournamentData()
+  const data = getTournamentDataStaticSync()
   const nextUp = enrichMatches(data, data.upcomingMatches.slice(0, 4))
   const liveNow = enrichMatches(data, data.liveMatches)
   const topScorer = data.topScorers[0]

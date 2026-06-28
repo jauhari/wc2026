@@ -15,7 +15,6 @@ import { quickPageMetadata } from "@/lib/seo"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 
-export const revalidate = 300
 export const dynamic = "force-static"
 
 export async function generateMetadata({

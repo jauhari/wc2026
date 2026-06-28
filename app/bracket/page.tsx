@@ -4,12 +4,13 @@ import { CountryFlag } from "@/components/country-flag"
 import { TrophyIcon } from "lucide-react"
 
 import {
-  getTournamentData,
+  getTournamentDataStaticSync,
   getTeam,
   getBracketByRound,
   roundOrder,
   roundLabels,
 } from "@/lib/data/tournament"
+import type { TournamentData } from "@/lib/data/tournament"
 import { formatKickoff } from "@/lib/data/queries"
 import type { BracketMatch } from "@/lib/types"
 import { cn } from "@/lib/utils"
@@ -25,10 +26,10 @@ export const metadata = quickPageMetadata({
   path: "/bracket",
 })
 
-export const revalidate = 120
+export const dynamic = "force-static"
 
 export default async function BracketPage() {
-  const data = await getTournamentData()
+  const data = getTournamentDataStaticSync()
 
   return (
     <div className="flex flex-col gap-5 p-4 md:p-6">
@@ -62,7 +63,7 @@ function RoundColumn({
 }: {
   round: (typeof roundOrder)[number]
   matches: BracketMatch[]
-  data: Awaited<ReturnType<typeof getTournamentData>>
+  data: TournamentData
 }) {
   const isFinal = round === "FINAL"
 
@@ -92,7 +93,7 @@ function BracketCard({
 }: {
   match: BracketMatch
   highlight?: boolean
-  data: Awaited<ReturnType<typeof getTournamentData>>
+  data: TournamentData
 }) {
   const home = match.homeId ? getTeam(data, match.homeId) : null
   const away = match.awayId ? getTeam(data, match.awayId) : null

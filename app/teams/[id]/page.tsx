@@ -30,10 +30,9 @@ import {
 } from "@/components/ui/table"
 import { Separator } from "@/components/ui/separator"
 import type { Metadata } from "next"
-import { getTournamentDataStatic } from "@/lib/data/tournament"
+import { getTournamentDataStaticSync } from "@/lib/data/tournament"
 import { quickPageMetadata } from "@/lib/seo"
 
-export const revalidate = 300
 export const dynamic = "force-static"
 
 export async function generateMetadata({
@@ -42,7 +41,7 @@ export async function generateMetadata({
   params: Promise<{ id: string }>
 }): Promise<Metadata> {
   const { id } = await params
-  const data = await getTournamentDataStatic()
+  const data = getTournamentDataStaticSync()
   const team = data.teamMap[id]
   if (!team) return {}
 
@@ -54,7 +53,7 @@ export async function generateMetadata({
 }
 
 export async function generateStaticParams() {
-  const data = await getTournamentDataStatic()
+  const data = getTournamentDataStaticSync()
   return data.teams.map((t) => ({ id: t.id }))
 }
 
@@ -64,7 +63,7 @@ export default async function TeamDetailPage({
   params: Promise<{ id: string }>
 }) {
   const { id } = await params
-  const data = await getTournamentDataStatic()
+  const data = getTournamentDataStaticSync()
   const team = data.teamMap[id]
   if (!team) notFound()
 

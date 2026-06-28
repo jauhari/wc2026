@@ -3,7 +3,8 @@ import { GoalIcon, HandHelpingIcon } from "lucide-react"
 import { CountryFlag } from "@/components/country-flag"
 import { StatsChart } from "@/components/stats-chart"
 import { GROUPS } from "@/lib/data/meta"
-import { getTournamentData, getTeam } from "@/lib/data/tournament"
+import { getTournamentDataStaticSync, getTeam } from "@/lib/data/tournament"
+import type { TournamentData } from "@/lib/data/tournament"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import {
@@ -31,10 +32,10 @@ export const metadata = quickPageMetadata({
   path: "/stats",
 })
 
-export const revalidate = 120
+export const dynamic = "force-static"
 
 export default async function StatsPage() {
-  const data = await getTournamentData()
+  const data = getTournamentDataStaticSync()
 
   const goalsByGroup = GROUPS.map((g) => {
     const groupMatches = data.matches.filter(
@@ -156,7 +157,7 @@ function PlayerTable({
   rows: typeof data.topScorers
   metric: "goals" | "assists"
   metricLabel: string
-  data: Awaited<ReturnType<typeof getTournamentData>>
+  data: TournamentData
 }) {
   return (
     <Card className="mt-3">
