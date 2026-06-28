@@ -30,8 +30,27 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { Separator } from "@/components/ui/separator"
+import type { Metadata } from "next"
+import { pageMetadata } from "@/lib/seo"
 
 export const revalidate = 120
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>
+}): Promise<Metadata> {
+  const { id } = await params
+  const data = await getTournamentData()
+  const team = data.teamMap[id]
+  if (!team) return {}
+
+  return pageMetadata({
+    title: team.name,
+    description: `Profil ${team.name} di Piala Dunia 2026: klasemen Grup ${team.group}, jadwal pertandingan, dan pencetak gol.`,
+    path: `/teams/${id}`,
+  })
+}
 
 export async function generateStaticParams() {
   const data = await getTournamentData()
