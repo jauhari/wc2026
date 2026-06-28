@@ -6,8 +6,10 @@ import {
 } from "@/lib/api/google-keywords"
 import { SITE_KEYWORDS } from "@/lib/seo/constants"
 import { withTTL } from "@/lib/data/ttl-cache"
+import { withTimeout } from "@/lib/utils/timeout"
 
 const KEYWORDS_CACHE_TTL_MS = 6 * 60 * 60 * 1000 // 6 jam
+const KEYWORDS_FETCH_TIMEOUT_MS = 2_000
 
 function bundledSnapshot(): TrendsKeywordSnapshot {
   const data = bundledTrends as TrendsKeywordSnapshot
@@ -22,7 +24,7 @@ async function refreshKeywords(): Promise<TrendsKeywordSnapshot> {
   const bundled = bundledSnapshot()
 
   try {
-    const live = await fetchLiveTrendKeywords()
+    const live = await withTimeout(fetchLiveTrendKeywords(), KEYWORDS_FETCH_TIMEOUT_MS)
     const merged = mergeKeywordLists(
       [...SITE_KEYWORDS],
       live.suggest,

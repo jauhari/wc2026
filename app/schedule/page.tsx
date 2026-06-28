@@ -2,16 +2,14 @@ import { ScheduleClient } from "@/components/schedule-client"
 import { getTournamentData } from "@/lib/data/tournament"
 import { enrichMatches } from "@/lib/enrich-matches"
 import { hostNations } from "@/lib/data/stadiums"
-import { pageMetadata } from "@/lib/seo"
+import { quickPageMetadata } from "@/lib/seo"
 
-export async function generateMetadata() {
-  return pageMetadata({
-    title: "Jadwal Pertandingan",
-    description:
-      "Jadwal lengkap 104 pertandingan Piala Dunia 2026 di USA, Kanada, dan Meksiko. Waktu WIB.",
-    path: "/schedule",
-  })
-}
+export const metadata = quickPageMetadata({
+  title: "Jadwal Pertandingan",
+  description:
+    "Jadwal lengkap 104 pertandingan Piala Dunia 2026 di USA, Kanada, dan Meksiko. Waktu WIB.",
+  path: "/schedule",
+})
 
 export const revalidate = 120
 

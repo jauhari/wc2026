@@ -22,16 +22,14 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { pageMetadata } from "@/lib/seo"
+import { quickPageMetadata } from "@/lib/seo"
 
-export async function generateMetadata() {
-  return pageMetadata({
-    title: "Statistik",
-    description:
-      "Statistik Piala Dunia 2026: top skor, top assist, total gol, dan distribusi gol per grup.",
-    path: "/stats",
-  })
-}
+export const metadata = quickPageMetadata({
+  title: "Statistik",
+  description:
+    "Statistik Piala Dunia 2026: top skor, top assist, total gol, dan distribusi gol per grup.",
+  path: "/stats",
+})
 
 export const revalidate = 120
 

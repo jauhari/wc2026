@@ -2,19 +2,15 @@ import { cache } from "react"
 import { unstable_cache } from "next/cache"
 
 import bundledOpenFootball from "@/data/openfootball-2026.json"
+import type { OpenFootballData, OpenFootballGoal, OpenFootballMatch } from "@/lib/api/openfootball"
+import type { BdlPlayerAssist } from "@/lib/api/balldontlie"
 import {
-  fetchOpenFootball,
-  type OpenFootballData,
-  type OpenFootballGoal,
-  type OpenFootballMatch,
-} from "@/lib/api/openfootball"
-import { fetchLiveOverlay, type BdlPlayerAssist } from "@/lib/api/balldontlie"
-import {
+  OVERLAY_TIMEOUT_MS,
   PAGE_REVALIDATE,
-  REMOTE_DATA_TTL_MS,
   TOURNAMENT_CACHE_TTL_MS,
 } from "@/lib/data/constants"
 import { withTTL } from "@/lib/data/ttl-cache"
+import { withTimeout } from "@/lib/utils/timeout"
 import { fetchFifaAssistStats, fetchFifaLiveOverlay } from "@/lib/api/fifa"
 import {
   GROUND_TO_STADIUM,
@@ -487,58 +483,56 @@ function loadBundled(): OpenFootballData {
   return bundledOpenFootball as OpenFootballData
 }
 
-/** GitHub refresh — di-cache 5 menit, tidak blocking navigasi pertama. */
-async function loadRemoteCached(): Promise<OpenFootballData | null> {
-  return withTTL("openfootball-remote", REMOTE_DATA_TTL_MS, async () => {
-    try {
-      return await fetchOpenFootball()
-    } catch {
-      return null
-    }
-  })
+function loadRawBundled(): { data: OpenFootballData; source: string } {
+  return { data: loadBundled(), source: "openfootball-bundled" }
 }
 
-async function loadRaw(): Promise<{ data: OpenFootballData; source: string }> {
-  const bundled = loadBundled()
-  const remote = await loadRemoteCached()
-  if (remote) return { data: remote, source: "openfootball" }
-  return { data: bundled, source: "openfootball-bundled" }
-}
-
-async function buildTournamentData(): Promise<TournamentData> {
-  const { data, source: baseSource } = await loadRaw()
-
-  const [fifaLiveResult, fifaAssistsResult, bdlLiveResult] = await Promise.allSettled([
-    fetchFifaLiveOverlay(),
-    fetchFifaAssistStats(),
-    process.env.BALLDONTLIE_API_KEY
-      ? fetchLiveOverlay(process.env.BALLDONTLIE_API_KEY)
-      : Promise.resolve(new Map()),
+async function fetchLiveOverlays(): Promise<{
+  overlay?: Awaited<ReturnType<typeof fetchFifaLiveOverlay>>
+  assistOverlay?: BdlPlayerAssist[]
+  overlaySource?: string
+  assistSource?: string
+}> {
+  const [fifaLiveResult, fifaAssistsResult] = await Promise.allSettled([
+    withTimeout(fetchFifaLiveOverlay(), OVERLAY_TIMEOUT_MS),
+    withTimeout(fetchFifaAssistStats(), OVERLAY_TIMEOUT_MS),
   ])
 
-  let overlay: Awaited<ReturnType<typeof fetchFifaLiveOverlay>> | undefined
-  let assistOverlay: BdlPlayerAssist[] | undefined
-  let overlaySource: string | null = null
-  let assistSource: string | null = null
+  const out: {
+    overlay?: Awaited<ReturnType<typeof fetchFifaLiveOverlay>>
+    assistOverlay?: BdlPlayerAssist[]
+    overlaySource?: string
+    assistSource?: string
+  } = {}
 
   if (fifaLiveResult.status === "fulfilled" && fifaLiveResult.value.size) {
-    overlay = fifaLiveResult.value
-    overlaySource = "fifa-live"
+    out.overlay = fifaLiveResult.value
+    out.overlaySource = "fifa-live"
   }
 
   if (fifaAssistsResult.status === "fulfilled" && fifaAssistsResult.value.length) {
-    assistOverlay = fifaAssistsResult.value
-    assistSource = "fifa-assists"
+    out.assistOverlay = fifaAssistsResult.value
+    out.assistSource = "fifa-assists"
   }
 
-  if (bdlLiveResult.status === "fulfilled" && bdlLiveResult.value.size) {
-    overlay = bdlLiveResult.value
-    overlaySource = "bdl-live"
-  }
+  return out
+}
 
-  const result = transform(data.matches, overlay, assistOverlay)
-  const source = [baseSource, overlaySource, assistSource].filter(Boolean).join("+")
+async function buildTournamentData(): Promise<TournamentData> {
+  const { data, source: baseSource } = loadRawBundled()
+  const live = await withTTL("tournament-overlays", 60_000, fetchLiveOverlays).catch(
+    () => null
+  )
+
+  const result = transform(data.matches, live?.overlay, live?.assistOverlay)
+  const source = [baseSource, live?.overlaySource, live?.assistSource].filter(Boolean).join("+")
   return { ...result, source: source || result.source }
+}
+
+/** Data bundled saja — tanpa network. Untuk halaman detail statis. */
+async function buildTournamentDataStatic(): Promise<TournamentData> {
+  const { data } = loadRawBundled()
+  return transform(data.matches)
 }
 
 const getCachedTournamentData = unstable_cache(
@@ -548,6 +542,15 @@ const getCachedTournamentData = unstable_cache(
 )
 
 export const getTournamentData = cache(getCachedTournamentData)
+
+const getCachedTournamentDataStatic = unstable_cache(
+  () => withTTL("tournament-static-v1", TOURNAMENT_CACHE_TTL_MS, buildTournamentDataStatic),
+  ["wc2026-tournament-static"],
+  { revalidate: PAGE_REVALIDATE, tags: ["tournament-static"] }
+)
+
+/** Cepat — hanya JSON bundled, tanpa API eksternal. */
+export const getTournamentDataStatic = cache(getCachedTournamentDataStatic)
 
 export function getGroupStandings(data: TournamentData, groupId: GroupId): StandingRow[] {
   return data.standingsByGroup[groupId] ?? []

@@ -5,13 +5,18 @@ import { ArrowLeftIcon } from "lucide-react"
 import type { Metadata } from "next"
 
 import { MatchDetailContent } from "@/components/match-detail-content"
-import { getTournamentData, getTeam, getStadium } from "@/lib/data/tournament"
+import {
+  getTournamentDataStatic,
+  getTeam,
+  getStadium,
+} from "@/lib/data/tournament"
 import { stageLabel } from "@/lib/data/queries"
-import { pageMetadata } from "@/lib/seo"
+import { quickPageMetadata } from "@/lib/seo"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 
-export const revalidate = 120
+export const revalidate = 300
+export const dynamic = "force-static"
 
 export async function generateMetadata({
   params,
@@ -19,7 +24,7 @@ export async function generateMetadata({
   params: Promise<{ id: string }>
 }): Promise<Metadata> {
   const { id } = await params
-  const data = await getTournamentData()
+  const data = await getTournamentDataStatic()
   const match = data.matchMap[id]
   if (!match) return {}
 
@@ -32,11 +37,11 @@ export async function generateMetadata({
     ? `Hasil ${home.name} vs ${away.name} (${score}) — ${stageLabel(match.stage)} Piala Dunia 2026. Daftar gol & detail pertandingan.`
     : `Jadwal ${home.name} vs ${away.name} — ${stageLabel(match.stage)} Piala Dunia 2026.`
 
-  return await pageMetadata({ title, description, path: `/matches/${id}` })
+  return quickPageMetadata({ title, description, path: `/matches/${id}` })
 }
 
 export async function generateStaticParams() {
-  const data = await getTournamentData()
+  const data = await getTournamentDataStatic()
   return data.matches.map((m) => ({ id: m.id }))
 }
 
@@ -46,7 +51,7 @@ export default async function MatchDetailPage({
   params: Promise<{ id: string }>
 }) {
   const { id } = await params
-  const data = await getTournamentData()
+  const data = await getTournamentDataStatic()
   const match = data.matchMap[id]
   if (!match) notFound()
 
@@ -58,7 +63,7 @@ export default async function MatchDetailPage({
   return (
     <div className="flex flex-col gap-5 p-4 md:p-6">
       <Button asChild variant="ghost" size="sm" className="w-fit">
-        <Link href="/matches">
+        <Link href="/matches" prefetch>
           <ArrowLeftIcon data-icon="inline-start" />
           Semua Pertandingan
         </Link>

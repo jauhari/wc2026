@@ -4,7 +4,6 @@ import { ArrowLeftIcon, MapPinIcon, TrophyIcon } from "lucide-react"
 
 import { CountryFlag } from "@/components/country-flag"
 import {
-  getTournamentData,
   getTeam,
   getGroupStandings,
   matchesForTeam,
@@ -31,9 +30,11 @@ import {
 } from "@/components/ui/table"
 import { Separator } from "@/components/ui/separator"
 import type { Metadata } from "next"
-import { pageMetadata } from "@/lib/seo"
+import { getTournamentDataStatic } from "@/lib/data/tournament"
+import { quickPageMetadata } from "@/lib/seo"
 
-export const revalidate = 120
+export const revalidate = 300
+export const dynamic = "force-static"
 
 export async function generateMetadata({
   params,
@@ -41,11 +42,11 @@ export async function generateMetadata({
   params: Promise<{ id: string }>
 }): Promise<Metadata> {
   const { id } = await params
-  const data = await getTournamentData()
+  const data = await getTournamentDataStatic()
   const team = data.teamMap[id]
   if (!team) return {}
 
-  return await pageMetadata({
+  return quickPageMetadata({
     title: team.name,
     description: `Profil ${team.name} di Piala Dunia 2026: klasemen Grup ${team.group}, jadwal pertandingan, dan pencetak gol.`,
     path: `/teams/${id}`,
@@ -53,7 +54,7 @@ export async function generateMetadata({
 }
 
 export async function generateStaticParams() {
-  const data = await getTournamentData()
+  const data = await getTournamentDataStatic()
   return data.teams.map((t) => ({ id: t.id }))
 }
 
@@ -63,7 +64,7 @@ export default async function TeamDetailPage({
   params: Promise<{ id: string }>
 }) {
   const { id } = await params
-  const data = await getTournamentData()
+  const data = await getTournamentDataStatic()
   const team = data.teamMap[id]
   if (!team) notFound()
 

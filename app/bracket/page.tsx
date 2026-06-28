@@ -16,16 +16,14 @@ import { cn } from "@/lib/utils"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { pageMetadata } from "@/lib/seo"
+import { quickPageMetadata } from "@/lib/seo"
 
-export async function generateMetadata() {
-  return pageMetadata({
-    title: "Bagan Guguran",
-    description:
-      "Bagan knockout Piala Dunia 2026: babak 32 besar, 16 besar, perempat final, semi final, dan final.",
-    path: "/bracket",
-  })
-}
+export const metadata = quickPageMetadata({
+  title: "Bagan Guguran",
+  description:
+    "Bagan knockout Piala Dunia 2026: babak 32 besar, 16 besar, perempat final, semi final, dan final.",
+  path: "/bracket",
+})
 
 export const revalidate = 120
 

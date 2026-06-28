@@ -1,5 +1,6 @@
 import type { Metadata } from "next"
 
+import { getBundledSeoKeywords } from "@/lib/seo/bundled-keywords"
 import { getMergedSeoKeywords } from "@/lib/seo/keywords"
 import {
   SITE_DESCRIPTION,
@@ -88,17 +89,18 @@ export async function buildRootMetadata(): Promise<Metadata> {
   return metadataWithKeywords(keywords)
 }
 
-export async function pageMetadata({
+function pageMetadataBase({
   title,
   description,
   path,
+  keywords,
 }: {
   title: string
   description: string
   path: string
-}): Promise<Metadata> {
+  keywords: string[]
+}): Metadata {
   const url = path.startsWith("http") ? path : `${SITE_URL}${path}`
-  const keywords = await getMergedSeoKeywords()
 
   return {
     title,
@@ -121,4 +123,23 @@ export async function pageMetadata({
       images: [OG_IMAGE.url],
     },
   }
+}
+
+/** Metadata halaman — tanpa network (cepat). */
+export function quickPageMetadata(opts: {
+  title: string
+  description: string
+  path: string
+}): Metadata {
+  return pageMetadataBase({ ...opts, keywords: getBundledSeoKeywords() })
+}
+
+/** Metadata halaman + keyword live dari Google (hanya halaman utama). */
+export async function pageMetadata(opts: {
+  title: string
+  description: string
+  path: string
+}): Promise<Metadata> {
+  const keywords = await getMergedSeoKeywords()
+  return pageMetadataBase({ ...opts, keywords })
 }
