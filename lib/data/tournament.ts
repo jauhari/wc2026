@@ -530,9 +530,19 @@ async function buildTournamentData(): Promise<TournamentData> {
 }
 
 /** Data bundled saja — tanpa network. Untuk halaman detail statis. */
-async function buildTournamentDataStatic(): Promise<TournamentData> {
+let tournamentDataStatic: TournamentData | null = null
+
+function buildTournamentDataStatic(): TournamentData {
   const { data } = loadRawBundled()
   return transform(data.matches)
+}
+
+/** Sinkron — tanpa unstable_cache, untuk halaman force-static. */
+export function getTournamentDataStaticSync(): TournamentData {
+  if (!tournamentDataStatic) {
+    tournamentDataStatic = buildTournamentDataStatic()
+  }
+  return tournamentDataStatic
 }
 
 const getCachedTournamentData = unstable_cache(
@@ -543,14 +553,8 @@ const getCachedTournamentData = unstable_cache(
 
 export const getTournamentData = cache(getCachedTournamentData)
 
-const getCachedTournamentDataStatic = unstable_cache(
-  () => withTTL("tournament-static-v1", TOURNAMENT_CACHE_TTL_MS, buildTournamentDataStatic),
-  ["wc2026-tournament-static"],
-  { revalidate: PAGE_REVALIDATE, tags: ["tournament-static"] }
-)
-
 /** Cepat — hanya JSON bundled, tanpa API eksternal. */
-export const getTournamentDataStatic = cache(getCachedTournamentDataStatic)
+export const getTournamentDataStatic = cache(async () => getTournamentDataStaticSync())
 
 export function getGroupStandings(data: TournamentData, groupId: GroupId): StandingRow[] {
   return data.standingsByGroup[groupId] ?? []

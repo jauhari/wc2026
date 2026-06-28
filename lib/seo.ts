@@ -25,7 +25,7 @@ const OG_IMAGE = {
   alt: "World Cup 2026 Monitor — Pantau hasil, klasemen, jadwal & statistik",
 }
 
-function metadataWithKeywords(keywords: string[]): Metadata {
+export function metadataWithKeywords(keywords: string[]): Metadata {
   return {
     metadataBase: new URL(SITE_URL),
     title: {
@@ -80,8 +80,8 @@ function metadataWithKeywords(keywords: string[]): Metadata {
   }
 }
 
-/** Metadata statis — fallback bila generateMetadata tidak dipakai. */
-export const baseMetadata: Metadata = metadataWithKeywords([...SITE_KEYWORDS])
+/** Metadata statis dengan keyword bundled (tanpa network). */
+export const baseMetadata: Metadata = metadataWithKeywords(getBundledSeoKeywords())
 
 /** Metadata beranda + keyword dinamis dari Google Trends/Suggest. */
 export async function buildRootMetadata(): Promise<Metadata> {

@@ -6,7 +6,7 @@ import type { Metadata } from "next"
 
 import { MatchDetailContent } from "@/components/match-detail-content"
 import {
-  getTournamentDataStatic,
+  getTournamentDataStaticSync,
   getTeam,
   getStadium,
 } from "@/lib/data/tournament"
@@ -24,7 +24,7 @@ export async function generateMetadata({
   params: Promise<{ id: string }>
 }): Promise<Metadata> {
   const { id } = await params
-  const data = await getTournamentDataStatic()
+  const data = getTournamentDataStaticSync()
   const match = data.matchMap[id]
   if (!match) return {}
 
@@ -41,7 +41,7 @@ export async function generateMetadata({
 }
 
 export async function generateStaticParams() {
-  const data = await getTournamentDataStatic()
+  const data = getTournamentDataStaticSync()
   return data.matches.map((m) => ({ id: m.id }))
 }
 
@@ -51,7 +51,7 @@ export default async function MatchDetailPage({
   params: Promise<{ id: string }>
 }) {
   const { id } = await params
-  const data = await getTournamentDataStatic()
+  const data = getTournamentDataStaticSync()
   const match = data.matchMap[id]
   if (!match) notFound()
 
