@@ -53,7 +53,15 @@ export interface TournamentData {
   fetchedAt: string
   source: string
   hasAssistData: boolean
-  matchGoals: Record<string, { home: OpenFootballGoal[]; away: OpenFootballGoal[] }>
+  matchGoals: Record<
+    string,
+    {
+      home: OpenFootballGoal[]
+      away: OpenFootballGoal[]
+      ht?: [number, number]
+      round?: string
+    }
+  >
 }
 
 function normalizePlayerName(name: string): string {
@@ -412,8 +420,13 @@ function transform(
 
     matches.push(match)
     matchKeyToId.set(`${m.date}|${m.team1}|${m.team2}|${m.num ?? ""}`, id)
-    if (m.goals1 || m.goals2) {
-      matchGoals[id] = { home: m.goals1 ?? [], away: m.goals2 ?? [] }
+    if (m.goals1?.length || m.goals2?.length || m.score?.ht || m.round) {
+      matchGoals[id] = {
+        home: m.goals1 ?? [],
+        away: m.goals2 ?? [],
+        ...(m.score?.ht ? { ht: m.score.ht } : {}),
+        ...(m.round ? { round: m.round } : {}),
+      }
     }
   })
 

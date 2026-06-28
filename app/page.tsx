@@ -1,7 +1,8 @@
 import Link from "next/link"
 import { TrophyIcon, GoalIcon, UsersIcon, CalendarDaysIcon, ArrowRightIcon, FlameIcon } from "lucide-react"
 
-import { getTournamentData, getTeam, getStadium } from "@/lib/data/tournament"
+import { getTournamentData, getTeam } from "@/lib/data/tournament"
+import { enrichMatches } from "@/lib/enrich-matches"
 import { hostNations } from "@/lib/data/stadiums"
 import { CountryFlag } from "@/components/country-flag"
 import { MatchCard } from "@/components/match-card"
@@ -21,8 +22,8 @@ export const revalidate = 60
 
 export default async function HomePage() {
   const data = await getTournamentData()
-  const nextUp = data.upcomingMatches.slice(0, 4)
-  const liveNow = data.liveMatches
+  const nextUp = enrichMatches(data, data.upcomingMatches.slice(0, 4))
+  const liveNow = enrichMatches(data, data.liveMatches)
   const topScorer = data.topScorers[0]
   const finishedCount = data.finishedMatches.length
 
@@ -115,14 +116,8 @@ export default async function HomePage() {
                 Sedang Berlangsung
               </SectionTitle>
               <div className="grid gap-3 sm:grid-cols-2">
-                {liveNow.map((m) => (
-                  <MatchCard
-                    key={m.id}
-                    match={m}
-                    home={getTeam(data, m.homeId)}
-                    away={getTeam(data, m.awayId)}
-                    stadium={getStadium(data, m.stadiumId)}
-                  />
+                {liveNow.map((item) => (
+                  <MatchCard key={item.match.id} {...item} />
                 ))}
               </div>
             </section>
@@ -141,15 +136,8 @@ export default async function HomePage() {
               </Button>
             </div>
             <div className="grid gap-3 sm:grid-cols-2">
-              {nextUp.map((m) => (
-                <MatchCard
-                  key={m.id}
-                  match={m}
-                  home={getTeam(data, m.homeId)}
-                  away={getTeam(data, m.awayId)}
-                  stadium={getStadium(data, m.stadiumId)}
-                  compact
-                />
+              {nextUp.map((item) => (
+                <MatchCard key={item.match.id} {...item} compact />
               ))}
             </div>
           </section>

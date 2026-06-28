@@ -3,15 +3,8 @@
 import * as React from "react"
 import { FlameIcon, CheckCircle2Icon, CalendarClockIcon } from "lucide-react"
 
-import type { Match, Stadium, Team } from "@/lib/types"
+import type { EnrichedMatch } from "@/lib/match-enriched"
 import { MatchCard } from "@/components/match-card"
-
-export interface EnrichedMatch {
-  match: Match
-  home: Team
-  away: Team
-  stadium: Stadium
-}
 import { Empty, EmptyDescription, EmptyTitle } from "@/components/ui/empty"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
@@ -93,8 +86,8 @@ function MatchGrid({
   }
   return (
     <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-      {list.map(({ match, home, away, stadium }) => (
-        <MatchCard key={match.id} match={match} home={home} away={away} stadium={stadium} />
+      {list.map((item) => (
+        <MatchCard key={item.match.id} {...item} />
       ))}
     </div>
   )
