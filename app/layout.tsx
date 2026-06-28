@@ -8,6 +8,7 @@ import { AppHeader } from "@/components/app-header"
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { Toaster } from "@/components/ui/sonner"
+import { CloudflareAnalytics } from "@/components/cloudflare-analytics"
 
 const geist = Geist({ subsets: ["latin"], variable: "--font-sans" })
 
@@ -21,6 +22,10 @@ export const metadata = {
   description:
     "Pantau Piala Dunia 2026: hasil pertandingan, klasemen, jadwal, bagan, dan statistik. Tuan rumah USA, Kanada & Meksiko.",
   applicationName: "WC 2026 Monitor",
+  icons: {
+    icon: [{ url: "/icon.svg", type: "image/svg+xml" }],
+    apple: [{ url: "/apple-icon.svg", type: "image/svg+xml", sizes: "180x180" }],
+  },
   appleWebApp: {
     capable: true,
     title: "WC 2026",
@@ -51,6 +56,7 @@ export default function RootLayout({
             </SidebarProvider>
             <Toaster richColors position="top-right" />
           </TooltipProvider>
+          <CloudflareAnalytics />
         </ThemeProvider>
       </body>
     </html>

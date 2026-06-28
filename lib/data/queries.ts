@@ -1,18 +1,23 @@
 import type { Match } from "@/lib/types"
 
+/** Semua jadwal ditampilkan dalam WIB (UTC+7), terlepas dari timezone server. */
+const WIB = "Asia/Jakarta"
+
 export function formatKickoff(iso: string): string {
   const d = new Date(iso)
-  return d.toLocaleString("id-ID", {
+  return `${d.toLocaleString("id-ID", {
+    timeZone: WIB,
     weekday: "short",
     day: "numeric",
     month: "short",
     hour: "2-digit",
     minute: "2-digit",
-  })
+  })} WIB`
 }
 
 export function formatDate(iso: string): string {
   return new Date(iso).toLocaleDateString("id-ID", {
+    timeZone: WIB,
     weekday: "long",
     day: "numeric",
     month: "long",
@@ -21,10 +26,11 @@ export function formatDate(iso: string): string {
 }
 
 export function formatTime(iso: string): string {
-  return new Date(iso).toLocaleTimeString("id-ID", {
+  return `${new Date(iso).toLocaleTimeString("id-ID", {
+    timeZone: WIB,
     hour: "2-digit",
     minute: "2-digit",
-  })
+  })} WIB`
 }
 
 export function groupMatchesByDay(list: Match[]): Record<string, Match[]> {
@@ -32,6 +38,7 @@ export function groupMatchesByDay(list: Match[]): Record<string, Match[]> {
   const sorted = [...list].sort((a, b) => a.kickoff.localeCompare(b.kickoff))
   for (const m of sorted) {
     const day = new Date(m.kickoff).toLocaleDateString("id-ID", {
+      timeZone: WIB,
       weekday: "long",
       day: "numeric",
       month: "long",

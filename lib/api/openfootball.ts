@@ -4,6 +4,8 @@ export const OPENFOOTBALL_URL =
 export interface OpenFootballGoal {
   name: string
   minute: string
+  /** Pemain assist — jika tersedia di sumber data */
+  assist?: string
   penalty?: boolean
   owngoal?: boolean
 }

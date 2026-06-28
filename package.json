@@ -5,14 +5,18 @@
   "private": true,
   "scripts": {
     "dev": "next dev --port 3260",
-    "build": "next build",
+    "build": "next build --webpack",
     "start": "next start",
     "lint": "eslint",
     "format": "prettier --write \"**/*.{ts,tsx}\"",
     "typecheck": "tsc --noEmit",
     "sync-data": "node scripts/sync-data.mjs",
+    "setup:cf-analytics": "node scripts/setup-cf-analytics.mjs",
+    "build:cf": "opennextjs-cloudflare build",
+    "build:cf:linux": "docker run --rm -v \"%cd%:/app\" -w /app node:22-bookworm-slim bash -c \"npm ci && npm run build:cf\"",
     "preview:cf": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
-    "deploy:cf": "opennextjs-cloudflare build && opennextjs-cloudflare deploy"
+    "deploy:cf": "opennextjs-cloudflare deploy",
+    "deploy:cf:linux": "npm run build:cf:linux && npm run deploy:cf"
   },
   "dependencies": {
     "class-variance-authority": "^0.7.1",

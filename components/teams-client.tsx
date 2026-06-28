@@ -6,7 +6,6 @@ import Link from "next/link"
 import { CountryFlag } from "@/components/country-flag"
 import type { GroupId, Team } from "@/lib/types"
 import { GROUPS } from "@/lib/data/meta"
-import { cn } from "@/lib/utils"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
 import {

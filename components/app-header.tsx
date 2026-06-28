@@ -12,9 +12,7 @@ import { Button } from "@/components/ui/button"
 
 export function AppHeader() {
   const pathname = usePathname()
-  const { resolvedTheme, setTheme } = useTheme()
-  const [mounted, setMounted] = React.useState(false)
-  React.useEffect(() => setMounted(true), [])
+  const { setTheme } = useTheme()
 
   const current = navItems.find((item) =>
     item.href === "/" ? pathname === "/" : pathname.startsWith(item.href)
@@ -36,20 +34,19 @@ export function AppHeader() {
             </span>
           </div>
         </div>
-        {mounted && (
-          <Button
-            variant="ghost"
-            size="icon"
-            aria-label="Ganti tema"
-            onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
-          >
-            {resolvedTheme === "dark" ? (
-              <SunIcon data-icon="inline-start" />
-            ) : (
-              <MoonIcon data-icon="inline-start" />
-            )}
-          </Button>
-        )}
+        <Button
+          variant="ghost"
+          size="icon"
+          aria-label="Ganti tema"
+          suppressHydrationWarning
+          onClick={() => {
+            const isDark = document.documentElement.classList.contains("dark")
+            setTheme(isDark ? "light" : "dark")
+          }}
+        >
+          <SunIcon className="hidden dark:block" data-icon="inline-start" />
+          <MoonIcon className="block dark:hidden" data-icon="inline-start" />
+        </Button>
       </div>
     </header>
   )

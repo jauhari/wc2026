@@ -6,7 +6,12 @@ import {
   type OpenFootballGoal,
   type OpenFootballMatch,
 } from "@/lib/api/openfootball"
-import { fetchLiveOverlay } from "@/lib/api/balldontlie"
+import {
+  fetchAssistStats,
+  fetchLiveOverlay,
+  type BdlPlayerAssist,
+} from "@/lib/api/balldontlie"
+import { fetchFifaAssistStats, fetchFifaLiveOverlay } from "@/lib/api/fifa"
 import {
   GROUND_TO_STADIUM,
   GROUPS,
@@ -47,7 +52,26 @@ export interface TournamentData {
   totalGoals: number
   fetchedAt: string
   source: string
+  hasAssistData: boolean
   matchGoals: Record<string, { home: OpenFootballGoal[]; away: OpenFootballGoal[] }>
+}
+
+function normalizePlayerName(name: string): string {
+  return name
+    .normalize("NFD")
+    .replace(/\p{M}/gu, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9\s]/g, "")
+    .trim()
+}
+
+function mapBdlPosition(pos?: string | null): string {
+  if (!pos) return "FW"
+  const p = pos.toUpperCase()
+  if (p.startsWith("G")) return "GK"
+  if (p.startsWith("D")) return "DF"
+  if (p.startsWith("M")) return "MF"
+  return "FW"
 }
 
 export { KNOCKOUT_LABELS as roundLabels }
@@ -118,7 +142,6 @@ function emptyStanding(teamId: string): StandingRow {
 }
 
 function computeStandings(matches: Match[], teams: Team[]): Record<GroupId, StandingRow[]> {
-  const teamGroup = Object.fromEntries(teams.map((t) => [t.id, t.group]))
   const rows: Record<GroupId, Record<string, StandingRow>> = {} as Record<
     GroupId,
     Record<string, StandingRow>
@@ -195,24 +218,37 @@ function buildScorers(
     const matchId = matchIds.get(`${m.date}|${m.team1}|${m.team2}|${m.num ?? ""}`)
     if (!matchId) continue
 
-    const addGoal = (goal: OpenFootballGoal, teamName: string) => {
+    const upsert = (
+      playerName: string,
+      teamName: string,
+      patch: Partial<Pick<Scorer, "goals" | "assists" | "position" | "minutes">>
+    ) => {
       const teamId = teamIds.get(teamName)
       if (!teamId || isPlaceholderTeam(teamName)) return
-      const key = `${goal.name}|${teamId}`
+      const key = `${normalizePlayerName(playerName)}|${teamId}`
       const existing = map.get(key)
+
       if (existing) {
-        existing.goals++
+        if (patch.goals) existing.goals += patch.goals
+        if (patch.assists) existing.assists += patch.assists
+        if (patch.minutes) existing.minutes = Math.max(existing.minutes, patch.minutes)
+        if (patch.position) existing.position = patch.position
       } else {
         map.set(key, {
-          id: teamSlug(`${goal.name}-${teamId}`),
-          name: goal.name,
+          id: teamSlug(`${playerName}-${teamId}`),
+          name: playerName,
           teamId,
-          position: "FW",
-          goals: 1,
-          assists: 0,
-          minutes: 0,
+          position: patch.position ?? "FW",
+          goals: patch.goals ?? 0,
+          assists: patch.assists ?? 0,
+          minutes: patch.minutes ?? 0,
         })
       }
+    }
+
+    const addGoal = (goal: OpenFootballGoal, teamName: string) => {
+      upsert(goal.name, teamName, { goals: 1 })
+      if (goal.assist) upsert(goal.assist, teamName, { assists: 1 })
     }
 
     for (const g of m.goals1 ?? []) {
@@ -224,6 +260,45 @@ function buildScorers(
   }
 
   return [...map.values()].sort((a, b) => b.goals - a.goals || a.name.localeCompare(b.name))
+}
+
+function mergeAssistStats(
+  scorers: Scorer[],
+  assists: BdlPlayerAssist[],
+  teamIds: Map<string, string>
+): Scorer[] {
+  const byNorm = new Map<string, Scorer>()
+  for (const s of scorers) {
+    byNorm.set(`${normalizePlayerName(s.name)}|${s.teamId}`, s)
+  }
+
+  for (const row of assists) {
+    const teamId = teamIds.get(row.teamName)
+    if (!teamId) continue
+    const norm = normalizePlayerName(row.name)
+    const key = `${norm}|${teamId}`
+    const existing = byNorm.get(key)
+
+    if (existing) {
+      existing.assists = Math.max(existing.assists, row.assists)
+      if (row.goals > existing.goals) existing.goals = row.goals
+      if (row.minutes > existing.minutes) existing.minutes = row.minutes
+      if (row.position) existing.position = mapBdlPosition(row.position)
+    } else if (row.assists > 0) {
+      const scorer: Scorer = {
+        id: teamSlug(`${row.name}-${teamId}`),
+        name: row.name,
+        teamId,
+        position: mapBdlPosition(row.position),
+        goals: row.goals,
+        assists: row.assists,
+        minutes: row.minutes,
+      }
+      byNorm.set(key, scorer)
+    }
+  }
+
+  return [...byNorm.values()].sort((a, b) => b.goals - a.goals || a.name.localeCompare(b.name))
 }
 
 function buildBracket(matches: Match[]): BracketMatch[] {
@@ -264,7 +339,8 @@ function buildBracket(matches: Match[]): BracketMatch[] {
 
 function transform(
   raw: OpenFootballMatch[],
-  liveOverlay?: Map<number, { status: MatchStatus; homeScore: number | null; awayScore: number | null; minute?: string }>
+  liveOverlay?: Map<number, { status: MatchStatus; homeScore: number | null; awayScore: number | null; minute?: string }>,
+  assistOverlay?: BdlPlayerAssist[]
 ): TournamentData {
   const { stadiums, stadiumMap } = buildStadiums()
   const teamNames = new Set<string>()
@@ -343,9 +419,15 @@ function transform(
 
   const matchMap = Object.fromEntries(matches.map((m) => [m.id, m]))
   const standingsByGroup = computeStandings(matches, teams)
-  const scorers = buildScorers(raw, matchKeyToId, nameToId)
+  let scorers = buildScorers(raw, matchKeyToId, nameToId)
+  if (assistOverlay?.length) {
+    scorers = mergeAssistStats(scorers, assistOverlay, nameToId)
+  }
+  const hasAssistData = scorers.some((s) => s.assists > 0)
   const topScorers = [...scorers].sort((a, b) => b.goals - a.goals || b.assists - a.assists)
-  const topAssists = [...topScorers].sort((a, b) => b.assists - a.assists || b.goals - a.goals)
+  const topAssists = [...scorers]
+    .filter((s) => s.assists > 0)
+    .sort((a, b) => b.assists - a.assists || b.goals - a.goals)
   const bracketMatches = buildBracket(matches)
 
   const liveMatches = matches.filter((m) => m.status === "live")
@@ -378,7 +460,8 @@ function transform(
     upcomingMatches,
     totalGoals,
     fetchedAt: new Date().toISOString(),
-    source: liveOverlay ? "openfootball+balldontlie" : "openfootball",
+    source: "openfootball",
+    hasAssistData,
     matchGoals,
   }
 }
@@ -396,16 +479,49 @@ async function loadRaw(): Promise<{ data: Awaited<ReturnType<typeof fetchOpenFoo
 export const getTournamentData = cache(async (): Promise<TournamentData> => {
   const { data } = await loadRaw()
   let overlay: Awaited<ReturnType<typeof fetchLiveOverlay>> | undefined
+  let assistOverlay: BdlPlayerAssist[] | undefined
+  let overlaySource: string | null = null
+  let assistSource: string | null = null
+
+  try {
+    overlay = await fetchFifaLiveOverlay()
+    if (overlay.size) overlaySource = "fifa-live"
+  } catch {
+    /* optional */
+  }
+
+  try {
+    assistOverlay = await fetchFifaAssistStats()
+    if (assistOverlay.length) assistSource = "fifa-assists"
+  } catch {
+    /* optional */
+  }
+
   const apiKey = process.env.BALLDONTLIE_API_KEY
   if (apiKey) {
     try {
-      overlay = await fetchLiveOverlay(apiKey)
+      const bdlOverlay = await fetchLiveOverlay(apiKey)
+      if (bdlOverlay.size) {
+        overlay = bdlOverlay
+        overlaySource = "bdl-live"
+      }
+    } catch {
+      /* optional */
+    }
+    try {
+      const bdlAssists = await fetchAssistStats(apiKey)
+      if (bdlAssists.length) {
+        assistOverlay = bdlAssists
+        assistSource = "bdl-assists"
+      }
     } catch {
       /* optional */
     }
   }
-  const result = transform(data.matches, overlay)
-  return { ...result, source: overlay ? "openfootball+balldontlie" : result.source }
+
+  const result = transform(data.matches, overlay, assistOverlay)
+  const source = [result.source, overlaySource, assistSource].filter(Boolean).join("+")
+  return { ...result, source: source || result.source }
 })
 
 export function getGroupStandings(data: TournamentData, groupId: GroupId): StandingRow[] {

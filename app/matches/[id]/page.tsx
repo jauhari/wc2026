@@ -167,7 +167,7 @@ function GoalList({
             <GoalIcon className="size-3.5 text-primary" />
             <span className="font-medium">{g.name}</span>
             <span className="text-muted-foreground">
-              {g.minute}'
+              {g.minute}&apos;
               {g.penalty && " (P)"}
               {g.owngoal && " (OG)"}
             </span>

@@ -62,7 +62,7 @@ export default async function StatsPage() {
         {topScorer && (
           <SummaryTile icon={<GoalIcon className="size-5" />} label="Top Skor" value={topScorer.name} hint={`${topScorer.goals} gol`} />
         )}
-        {topAssist && (
+        {topAssist && topAssist.assists > 0 && (
           <SummaryTile icon={<HandHelpingIcon className="size-5" />} label="Top Assist" value={topAssist.name} hint={`${topAssist.assists} assist`} />
         )}
       </div>
@@ -92,7 +92,20 @@ export default async function StatsPage() {
           <PlayerTable rows={data.topScorers.slice(0, 15)} metric="goals" metricLabel="Gol" data={data} />
         </TabsContent>
         <TabsContent value="assists">
-          <PlayerTable rows={data.topAssists.slice(0, 15)} metric="assists" metricLabel="Assist" data={data} />
+          {data.hasAssistData ? (
+            <PlayerTable rows={data.topAssists.slice(0, 15)} metric="assists" metricLabel="Assist" data={data} />
+          ) : (
+            <Card className="mt-3">
+              <CardContent className="flex flex-col items-center gap-2 p-8 text-center">
+                <HandHelpingIcon className="size-8 text-muted-foreground/60" />
+                <p className="text-sm font-medium">Data assist belum tersedia</p>
+                <p className="max-w-md text-sm text-muted-foreground">
+                  Data assist belum bisa dimuat dari FIFA API saat ini. Coba refresh nanti —
+                  sumber openfootball sendiri tidak mencatat assist per gol.
+                </p>
+              </CardContent>
+            </Card>
+          )}
         </TabsContent>
       </Tabs>
     </div>

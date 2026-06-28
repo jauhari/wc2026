@@ -3,7 +3,7 @@
 import * as React from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { TrophyIcon } from "lucide-react"
+import { CloudIcon, TrophyIcon } from "lucide-react"
 
 import { CountryFlag } from "@/components/country-flag"
 import { navItems } from "@/lib/nav"
@@ -97,6 +97,27 @@ export function AppSidebar() {
 
       <SidebarFooter>
         <SidebarMenu>
+          <SidebarMenuItem>
+            <div className="flex flex-col gap-1 px-2 py-1 group-data-[collapsible=icon]:hidden">
+              <a
+                href="https://dash.cloudflare.com/?to=/:account/workers-and-pages/view/wc2026/production/observability"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 rounded-md py-1 text-xs text-sidebar-foreground/70 transition-colors hover:text-sidebar-accent-foreground"
+              >
+                <CloudIcon className="size-3.5 shrink-0" />
+                <span>Worker Metrics</span>
+              </a>
+              <a
+                href="https://dash.cloudflare.com/?to=/:account/web-analytics"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 rounded-md py-1 pl-5 text-xs text-sidebar-foreground/60 transition-colors hover:text-sidebar-accent-foreground"
+              >
+                <span>Web Analytics</span>
+              </a>
+            </div>
+          </SidebarMenuItem>
           <SidebarMenuItem>
             <TricolorStrip />
           </SidebarMenuItem>

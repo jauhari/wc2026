@@ -225,7 +225,10 @@ export default async function HomePage() {
 
           <p className="text-center text-[10px] text-muted-foreground">
             Data diperbarui:{" "}
-            {new Date(data.fetchedAt).toLocaleString("id-ID")} · {data.source}
+            {new Date(data.fetchedAt).toLocaleString("id-ID", {
+              timeZone: "Asia/Jakarta",
+            })}{" "}
+            WIB · {data.source}
           </p>
         </div>
       </div>
