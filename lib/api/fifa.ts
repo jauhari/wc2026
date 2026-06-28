@@ -65,7 +65,7 @@ export async function fetchFifaLiveOverlay(): Promise<
   url.searchParams.set("count", "500")
   url.searchParams.set("idSeason", SEASON)
 
-  const res = await fetch(url, { next: { revalidate: 30 } })
+  const res = await fetch(url, { next: { revalidate: 60 } })
   if (!res.ok) return overlay
 
   const body = (await res.json()) as FifaPaged<FifaCalendarMatch>

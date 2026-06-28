@@ -23,7 +23,7 @@ import {
 } from "@/components/ui/table"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
-export const revalidate = 60
+export const revalidate = 120
 
 export default async function StatsPage() {
   const data = await getTournamentData()

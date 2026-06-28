@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 
-export const revalidate = 60
+export const revalidate = 120
 
 export default async function HomePage() {
   const data = await getTournamentData()

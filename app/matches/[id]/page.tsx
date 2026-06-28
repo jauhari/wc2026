@@ -7,7 +7,7 @@ import { getTournamentData, getTeam, getStadium } from "@/lib/data/tournament"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 
-export const revalidate = 60
+export const revalidate = 120
 
 export async function generateStaticParams() {
   const data = await getTournamentData()

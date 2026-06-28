@@ -31,7 +31,7 @@ import {
 } from "@/components/ui/table"
 import { Separator } from "@/components/ui/separator"
 
-export const revalidate = 60
+export const revalidate = 120
 
 export async function generateStaticParams() {
   const data = await getTournamentData()

@@ -32,7 +32,7 @@ export function AppSidebar() {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
-              <Link href="/">
+              <Link href="/" prefetch>
                 <div className="bg-primary text-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg">
                   <TrophyIcon className="size-5" />
                 </div>
@@ -65,7 +65,7 @@ export function AppSidebar() {
                       isActive={active}
                       tooltip={item.title}
                     >
-                      <Link href={item.href}>
+                      <Link href={item.href} prefetch>
                         <item.icon />
                         <span>{item.title}</span>
                       </Link>

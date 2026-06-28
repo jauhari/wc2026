@@ -17,7 +17,7 @@ import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { ScrollArea } from "@/components/ui/scroll-area"
 
-export const revalidate = 60
+export const revalidate = 120
 
 export default async function BracketPage() {
   const data = await getTournamentData()

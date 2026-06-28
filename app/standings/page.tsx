@@ -21,7 +21,7 @@ import {
 } from "@/components/ui/table"
 import { cn } from "@/lib/utils"
 
-export const revalidate = 60
+export const revalidate = 120
 
 export default async function StandingsPage() {
   const data = await getTournamentData()

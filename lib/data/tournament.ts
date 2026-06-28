@@ -1,16 +1,20 @@
 import { cache } from "react"
+import { unstable_cache } from "next/cache"
 
+import bundledOpenFootball from "@/data/openfootball-2026.json"
 import {
   fetchOpenFootball,
-  fetchOpenFootballLocal,
+  type OpenFootballData,
   type OpenFootballGoal,
   type OpenFootballMatch,
 } from "@/lib/api/openfootball"
+import { fetchLiveOverlay, type BdlPlayerAssist } from "@/lib/api/balldontlie"
 import {
-  fetchAssistStats,
-  fetchLiveOverlay,
-  type BdlPlayerAssist,
-} from "@/lib/api/balldontlie"
+  PAGE_REVALIDATE,
+  REMOTE_DATA_TTL_MS,
+  TOURNAMENT_CACHE_TTL_MS,
+} from "@/lib/data/constants"
+import { withTTL } from "@/lib/data/ttl-cache"
 import { fetchFifaAssistStats, fetchFifaLiveOverlay } from "@/lib/api/fifa"
 import {
   GROUND_TO_STADIUM,
@@ -479,63 +483,71 @@ function transform(
   }
 }
 
-async function loadRaw(): Promise<{ data: Awaited<ReturnType<typeof fetchOpenFootball>>; source: string }> {
-  try {
-    const data = await fetchOpenFootball()
-    return { data, source: "openfootball" }
-  } catch {
-    const data = await fetchOpenFootballLocal()
-    return { data, source: "openfootball-local" }
-  }
+function loadBundled(): OpenFootballData {
+  return bundledOpenFootball as OpenFootballData
 }
 
-export const getTournamentData = cache(async (): Promise<TournamentData> => {
-  const { data } = await loadRaw()
-  let overlay: Awaited<ReturnType<typeof fetchLiveOverlay>> | undefined
+/** GitHub refresh — di-cache 5 menit, tidak blocking navigasi pertama. */
+async function loadRemoteCached(): Promise<OpenFootballData | null> {
+  return withTTL("openfootball-remote", REMOTE_DATA_TTL_MS, async () => {
+    try {
+      return await fetchOpenFootball()
+    } catch {
+      return null
+    }
+  })
+}
+
+async function loadRaw(): Promise<{ data: OpenFootballData; source: string }> {
+  const bundled = loadBundled()
+  const remote = await loadRemoteCached()
+  if (remote) return { data: remote, source: "openfootball" }
+  return { data: bundled, source: "openfootball-bundled" }
+}
+
+async function buildTournamentData(): Promise<TournamentData> {
+  const { data, source: baseSource } = await loadRaw()
+
+  const [fifaLiveResult, fifaAssistsResult, bdlLiveResult] = await Promise.allSettled([
+    fetchFifaLiveOverlay(),
+    fetchFifaAssistStats(),
+    process.env.BALLDONTLIE_API_KEY
+      ? fetchLiveOverlay(process.env.BALLDONTLIE_API_KEY)
+      : Promise.resolve(new Map()),
+  ])
+
+  let overlay: Awaited<ReturnType<typeof fetchFifaLiveOverlay>> | undefined
   let assistOverlay: BdlPlayerAssist[] | undefined
   let overlaySource: string | null = null
   let assistSource: string | null = null
 
-  try {
-    overlay = await fetchFifaLiveOverlay()
-    if (overlay.size) overlaySource = "fifa-live"
-  } catch {
-    /* optional */
+  if (fifaLiveResult.status === "fulfilled" && fifaLiveResult.value.size) {
+    overlay = fifaLiveResult.value
+    overlaySource = "fifa-live"
   }
 
-  try {
-    assistOverlay = await fetchFifaAssistStats()
-    if (assistOverlay.length) assistSource = "fifa-assists"
-  } catch {
-    /* optional */
+  if (fifaAssistsResult.status === "fulfilled" && fifaAssistsResult.value.length) {
+    assistOverlay = fifaAssistsResult.value
+    assistSource = "fifa-assists"
   }
 
-  const apiKey = process.env.BALLDONTLIE_API_KEY
-  if (apiKey) {
-    try {
-      const bdlOverlay = await fetchLiveOverlay(apiKey)
-      if (bdlOverlay.size) {
-        overlay = bdlOverlay
-        overlaySource = "bdl-live"
-      }
-    } catch {
-      /* optional */
-    }
-    try {
-      const bdlAssists = await fetchAssistStats(apiKey)
-      if (bdlAssists.length) {
-        assistOverlay = bdlAssists
-        assistSource = "bdl-assists"
-      }
-    } catch {
-      /* optional */
-    }
+  if (bdlLiveResult.status === "fulfilled" && bdlLiveResult.value.size) {
+    overlay = bdlLiveResult.value
+    overlaySource = "bdl-live"
   }
 
   const result = transform(data.matches, overlay, assistOverlay)
-  const source = [result.source, overlaySource, assistSource].filter(Boolean).join("+")
+  const source = [baseSource, overlaySource, assistSource].filter(Boolean).join("+")
   return { ...result, source: source || result.source }
-})
+}
+
+const getCachedTournamentData = unstable_cache(
+  () => withTTL("tournament-data", TOURNAMENT_CACHE_TTL_MS, buildTournamentData),
+  ["wc2026-tournament-data"],
+  { revalidate: PAGE_REVALIDATE, tags: ["tournament"] }
+)
+
+export const getTournamentData = cache(getCachedTournamentData)
 
 export function getGroupStandings(data: TournamentData, groupId: GroupId): StandingRow[] {
   return data.standingsByGroup[groupId] ?? []
