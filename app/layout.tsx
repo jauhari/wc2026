@@ -10,7 +10,7 @@ import { TooltipProvider } from "@/components/ui/tooltip"
 import { Toaster } from "@/components/ui/sonner"
 import { CloudflareAnalytics } from "@/components/cloudflare-analytics"
 import { SiteJsonLd } from "@/components/site-json-ld"
-import { baseMetadata } from "@/lib/seo"
+import { buildRootMetadata } from "@/lib/seo"
 
 const geist = Geist({ subsets: ["latin"], variable: "--font-sans" })
 
@@ -19,7 +19,9 @@ const fontMono = Geist_Mono({
   variable: "--font-mono",
 })
 
-export const metadata = baseMetadata
+export async function generateMetadata() {
+  return buildRootMetadata()
+}
 
 export default function RootLayout({
   children,

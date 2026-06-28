@@ -1,4 +1,4 @@
-import { SITE_DESCRIPTION, SITE_NAME, SITE_URL } from "@/lib/seo"
+import { SITE_DESCRIPTION, SITE_NAME, SITE_URL } from "@/lib/seo/constants"
 
 export function SiteJsonLd() {
   const website = {

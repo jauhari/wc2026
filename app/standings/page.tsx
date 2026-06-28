@@ -22,12 +22,14 @@ import {
 import { cn } from "@/lib/utils"
 import { pageMetadata } from "@/lib/seo"
 
-export const metadata = pageMetadata({
-  title: "Klasemen Grup",
-  description:
-    "Klasemen 12 grup Piala Dunia 2026 (A–L). Poin, selisih gol, dan peringkat tim menuju babak 32 besar.",
-  path: "/standings",
-})
+export async function generateMetadata() {
+  return pageMetadata({
+    title: "Klasemen Grup",
+    description:
+      "Klasemen 12 grup Piala Dunia 2026 (A–L). Poin, selisih gol, dan peringkat tim menuju babak 32 besar.",
+    path: "/standings",
+  })
+}
 
 export const revalidate = 120
 

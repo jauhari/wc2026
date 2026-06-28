@@ -24,12 +24,14 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { pageMetadata } from "@/lib/seo"
 
-export const metadata = pageMetadata({
-  title: "Statistik",
-  description:
-    "Statistik Piala Dunia 2026: top skor, top assist, total gol, dan distribusi gol per grup.",
-  path: "/stats",
-})
+export async function generateMetadata() {
+  return pageMetadata({
+    title: "Statistik",
+    description:
+      "Statistik Piala Dunia 2026: top skor, top assist, total gol, dan distribusi gol per grup.",
+    path: "/stats",
+  })
+}
 
 export const revalidate = 120
 

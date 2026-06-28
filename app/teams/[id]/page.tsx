@@ -45,7 +45,7 @@ export async function generateMetadata({
   const team = data.teamMap[id]
   if (!team) return {}
 
-  return pageMetadata({
+  return await pageMetadata({
     title: team.name,
     description: `Profil ${team.name} di Piala Dunia 2026: klasemen Grup ${team.group}, jadwal pertandingan, dan pencetak gol.`,
     path: `/teams/${id}`,

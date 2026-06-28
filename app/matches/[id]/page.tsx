@@ -32,7 +32,7 @@ export async function generateMetadata({
     ? `Hasil ${home.name} vs ${away.name} (${score}) — ${stageLabel(match.stage)} Piala Dunia 2026. Daftar gol & detail pertandingan.`
     : `Jadwal ${home.name} vs ${away.name} — ${stageLabel(match.stage)} Piala Dunia 2026.`
 
-  return pageMetadata({ title, description, path: `/matches/${id}` })
+  return await pageMetadata({ title, description, path: `/matches/${id}` })
 }
 
 export async function generateStaticParams() {
