@@ -31,7 +31,7 @@ export interface OpenFootballData {
 
 export async function fetchOpenFootball(): Promise<OpenFootballData> {
   const res = await fetch(OPENFOOTBALL_URL, {
-    next: { revalidate: 300 },
+    cache: "no-store",
   })
   if (!res.ok) throw new Error(`openfootball fetch failed: ${res.status}`)
   return res.json() as Promise<OpenFootballData>

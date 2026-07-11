@@ -3,6 +3,8 @@ import { notFound } from "next/navigation"
 import { ArrowLeftIcon, MapPinIcon, TrophyIcon } from "lucide-react"
 
 import { CountryFlag } from "@/components/country-flag"
+import { TeamFavoriteHeader } from "@/components/team-favorite-header"
+import { TeamScorerChip } from "@/components/team-scorer-chip"
 import {
   getTeam,
   getGroupStandings,
@@ -30,10 +32,10 @@ import {
 } from "@/components/ui/table"
 import { Separator } from "@/components/ui/separator"
 import type { Metadata } from "next"
-import { getTournamentDataStaticSync } from "@/lib/data/tournament"
+import { getTournamentData } from "@/lib/data/tournament"
 import { quickPageMetadata } from "@/lib/seo"
 
-export const dynamic = "force-static"
+export const dynamic = "force-dynamic"
 
 export async function generateMetadata({
   params,
@@ -41,7 +43,7 @@ export async function generateMetadata({
   params: Promise<{ id: string }>
 }): Promise<Metadata> {
   const { id } = await params
-  const data = getTournamentDataStaticSync()
+  const data = await getTournamentData()
   const team = data.teamMap[id]
   if (!team) return {}
 
@@ -52,18 +54,13 @@ export async function generateMetadata({
   })
 }
 
-export async function generateStaticParams() {
-  const data = getTournamentDataStaticSync()
-  return data.teams.map((t) => ({ id: t.id }))
-}
-
 export default async function TeamDetailPage({
   params,
 }: {
   params: Promise<{ id: string }>
 }) {
   const { id } = await params
-  const data = getTournamentDataStaticSync()
+  const data = await getTournamentData()
   const team = data.teamMap[id]
   if (!team) notFound()
 
@@ -107,6 +104,7 @@ export default async function TeamDetailPage({
               </span>
             </div>
           </div>
+          <TeamFavoriteHeader teamId={team.id} teamName={team.shortName} />
         </CardContent>
       </Card>
 
@@ -248,15 +246,7 @@ export default async function TeamDetailPage({
           </CardHeader>
           <CardContent className="flex flex-wrap gap-2">
             {teamScorers.map((p) => (
-              <div
-                key={p.id}
-                className="flex items-center gap-2 rounded-lg border bg-card px-3 py-1.5 text-sm"
-              >
-                <span className="font-medium">{p.name}</span>
-                <Badge variant="secondary" className="text-[10px]">
-                  ⚽ {p.goals}
-                </Badge>
-              </div>
+              <TeamScorerChip key={p.id} id={p.id} name={p.name} goals={p.goals} />
             ))}
           </CardContent>
         </Card>

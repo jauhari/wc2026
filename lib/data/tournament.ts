@@ -1,12 +1,17 @@
 import { cache } from "react"
-import { unstable_cache } from "next/cache"
 
 import bundledOpenFootball from "@/data/openfootball-2026.json"
-import type { OpenFootballData, OpenFootballGoal, OpenFootballMatch } from "@/lib/api/openfootball"
+import {
+  fetchOpenFootball,
+  type OpenFootballData,
+  type OpenFootballGoal,
+  type OpenFootballMatch,
+} from "@/lib/api/openfootball"
 import type { BdlPlayerAssist } from "@/lib/api/balldontlie"
 import {
+  OPENFOOTBALL_CACHE_TTL_MS,
+  OVERLAY_CACHE_TTL_MS,
   OVERLAY_TIMEOUT_MS,
-  PAGE_REVALIDATE,
   TOURNAMENT_CACHE_TTL_MS,
 } from "@/lib/data/constants"
 import { withTTL } from "@/lib/data/ttl-cache"
@@ -487,6 +492,15 @@ function loadRawBundled(): { data: OpenFootballData; source: string } {
   return { data: loadBundled(), source: "openfootball-bundled" }
 }
 
+async function loadRawData(): Promise<{ data: OpenFootballData; source: string }> {
+  try {
+    const data = await withTTL("openfootball-remote", OPENFOOTBALL_CACHE_TTL_MS, fetchOpenFootball)
+    return { data, source: "openfootball-live" }
+  } catch {
+    return loadRawBundled()
+  }
+}
+
 async function fetchLiveOverlays(): Promise<{
   overlay?: Awaited<ReturnType<typeof fetchFifaLiveOverlay>>
   assistOverlay?: BdlPlayerAssist[]
@@ -519,8 +533,8 @@ async function fetchLiveOverlays(): Promise<{
 }
 
 async function buildTournamentData(): Promise<TournamentData> {
-  const { data, source: baseSource } = loadRawBundled()
-  const live = await withTTL("tournament-overlays", 60_000, fetchLiveOverlays).catch(
+  const { data, source: baseSource } = await loadRawData()
+  const live = await withTTL("tournament-overlays", OVERLAY_CACHE_TTL_MS, fetchLiveOverlays).catch(
     () => null
   )
 
@@ -545,13 +559,9 @@ export function getTournamentDataStaticSync(): TournamentData {
   return tournamentDataStatic
 }
 
-const getCachedTournamentData = unstable_cache(
-  () => withTTL("tournament-data", TOURNAMENT_CACHE_TTL_MS, buildTournamentData),
-  ["wc2026-tournament-data"],
-  { revalidate: PAGE_REVALIDATE, tags: ["tournament"] }
+export const getTournamentData = cache(async () =>
+  withTTL("tournament-data", TOURNAMENT_CACHE_TTL_MS, buildTournamentData)
 )
-
-export const getTournamentData = cache(getCachedTournamentData)
 
 /** Cepat — hanya JSON bundled, tanpa API eksternal. */
 export const getTournamentDataStatic = cache(async () => getTournamentDataStaticSync())

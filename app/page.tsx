@@ -2,12 +2,13 @@ import type { Metadata } from "next"
 import Link from "next/link"
 import { TrophyIcon, GoalIcon, UsersIcon, CalendarDaysIcon, ArrowRightIcon, FlameIcon } from "lucide-react"
 
-import { getTournamentDataStaticSync, getTeam } from "@/lib/data/tournament"
+import { getTournamentData, getTeam } from "@/lib/data/tournament"
 import { buildRootMetadata } from "@/lib/seo"
 import { enrichMatches } from "@/lib/enrich-matches"
 import { hostNations } from "@/lib/data/stadiums"
 import { CountryFlag } from "@/components/country-flag"
 import { MatchCard } from "@/components/match-card"
+import { FavoritesHomeSection } from "@/components/favorites-home-section"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -20,16 +21,20 @@ import {
 } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 
-export const dynamic = "force-static"
+export const dynamic = "force-dynamic"
 
 export async function generateMetadata(): Promise<Metadata> {
   return buildRootMetadata()
 }
 
 export default async function HomePage() {
-  const data = getTournamentDataStaticSync()
+  const data = await getTournamentData()
   const nextUp = enrichMatches(data, data.upcomingMatches.slice(0, 4))
   const liveNow = enrichMatches(data, data.liveMatches)
+  const favoriteMatches = enrichMatches(
+    data,
+    [...data.liveMatches, ...data.upcomingMatches]
+  )
   const topScorer = data.topScorers[0]
   const finishedCount = data.finishedMatches.length
 
@@ -128,6 +133,8 @@ export default async function HomePage() {
               </div>
             </section>
           )}
+
+          <FavoritesHomeSection matches={favoriteMatches} />
 
           <section className="flex flex-col gap-3">
             <div className="flex items-center justify-between">

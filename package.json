@@ -13,7 +13,7 @@
     "sync-data": "node scripts/sync-data.mjs",
     "sync-keywords": "node scripts/sync-keywords.mjs",
     "setup:cf-analytics": "node scripts/setup-cf-analytics.mjs",
-    "prebuild:cf": "npm run sync-keywords",
+    "prebuild:cf": "npm run sync-data && npm run sync-keywords",
     "build:cf": "opennextjs-cloudflare build",
     "build:cf:linux": "docker run --rm -v \"%cd%:/app\" -w /app node:22-bookworm-slim bash -c \"npm ci && npm run build:cf\"",
     "preview:cf": "opennextjs-cloudflare build && opennextjs-cloudflare preview",

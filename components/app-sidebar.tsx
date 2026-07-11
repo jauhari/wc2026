@@ -20,11 +20,18 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarRail,
+  useSidebar,
 } from "@/components/ui/sidebar"
 import { cn } from "@/lib/utils"
 
 export function AppSidebar() {
   const pathname = usePathname()
+  const { isMobile, setOpenMobile } = useSidebar()
+
+  /** Di mobile, tutup sheet setelah navigasi supaya tidak menutupi halaman. */
+  const closeMobileSidebar = () => {
+    if (isMobile) setOpenMobile(false)
+  }
 
   return (
     <Sidebar collapsible="icon">
@@ -32,7 +39,7 @@ export function AppSidebar() {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
-              <Link href="/" prefetch>
+              <Link href="/" prefetch onClick={closeMobileSidebar}>
                 <div className="bg-primary text-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg">
                   <TrophyIcon className="size-5" />
                 </div>
@@ -65,7 +72,7 @@ export function AppSidebar() {
                       isActive={active}
                       tooltip={item.title}
                     >
-                      <Link href={item.href} prefetch>
+                      <Link href={item.href} prefetch onClick={closeMobileSidebar}>
                         <item.icon />
                         <span>{item.title}</span>
                       </Link>

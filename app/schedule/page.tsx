@@ -1,5 +1,5 @@
 import { ScheduleClient } from "@/components/schedule-client"
-import { getTournamentDataStaticSync } from "@/lib/data/tournament"
+import { getTournamentData } from "@/lib/data/tournament"
 import { enrichMatches } from "@/lib/enrich-matches"
 import { hostNations } from "@/lib/data/stadiums"
 import { quickPageMetadata } from "@/lib/seo"
@@ -11,10 +11,10 @@ export const metadata = quickPageMetadata({
   path: "/schedule",
 })
 
-export const dynamic = "force-static"
+export const dynamic = "force-dynamic"
 
 export default async function SchedulePage() {
-  const data = getTournamentDataStaticSync()
+  const data = await getTournamentData()
 
   return (
     <ScheduleClient

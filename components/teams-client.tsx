@@ -4,6 +4,7 @@ import * as React from "react"
 import Link from "next/link"
 
 import { CountryFlag } from "@/components/country-flag"
+import { FavoriteButton } from "@/components/favorite-button"
 import type { GroupId, Team } from "@/lib/types"
 import { GROUPS } from "@/lib/data/meta"
 import { Badge } from "@/components/ui/badge"
@@ -60,8 +61,14 @@ export function TeamsClient({ teams }: { teams: Team[] }) {
       ) : (
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
           {filtered.map((team) => (
-            <Link key={team.id} href={`/teams/${team.id}`}>
-              <Card className="transition-colors hover:border-primary/50 hover:bg-muted/40">
+            <Card
+              key={team.id}
+              className="relative transition-colors hover:border-primary/50 hover:bg-muted/40"
+            >
+              <div className="absolute top-1 right-1 z-10">
+                <FavoriteButton kind="team" id={team.id} label={team.shortName} />
+              </div>
+              <Link href={`/teams/${team.id}`}>
                 <CardContent className="flex flex-col items-center gap-2 p-4 text-center">
                   <CountryFlag code={team.flag} size="3xl" title={team.name} ring />
                   <span className="font-semibold leading-tight">{team.shortName}</span>
@@ -79,8 +86,8 @@ export function TeamsClient({ teams }: { teams: Team[] }) {
                     </span>
                   )}
                 </CardContent>
-              </Card>
-            </Link>
+              </Link>
+            </Card>
           ))}
         </div>
       )}

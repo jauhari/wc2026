@@ -6,7 +6,7 @@ import type { Metadata } from "next"
 
 import { MatchDetailContent } from "@/components/match-detail-content"
 import {
-  getTournamentDataStaticSync,
+  getTournamentData,
   getTeam,
   getStadium,
 } from "@/lib/data/tournament"
@@ -15,7 +15,7 @@ import { quickPageMetadata } from "@/lib/seo"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 
-export const dynamic = "force-static"
+export const dynamic = "force-dynamic"
 
 export async function generateMetadata({
   params,
@@ -23,7 +23,7 @@ export async function generateMetadata({
   params: Promise<{ id: string }>
 }): Promise<Metadata> {
   const { id } = await params
-  const data = getTournamentDataStaticSync()
+  const data = await getTournamentData()
   const match = data.matchMap[id]
   if (!match) return {}
 
@@ -39,18 +39,13 @@ export async function generateMetadata({
   return quickPageMetadata({ title, description, path: `/matches/${id}` })
 }
 
-export async function generateStaticParams() {
-  const data = getTournamentDataStaticSync()
-  return data.matches.map((m) => ({ id: m.id }))
-}
-
 export default async function MatchDetailPage({
   params,
 }: {
   params: Promise<{ id: string }>
 }) {
   const { id } = await params
-  const data = getTournamentDataStaticSync()
+  const data = await getTournamentData()
   const match = data.matchMap[id]
   if (!match) notFound()
 
