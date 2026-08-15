@@ -7,6 +7,7 @@ import {
   BarChart3Icon,
   ShieldIcon,
   StarIcon,
+  DicesIcon,
 } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
 
@@ -26,4 +27,10 @@ export const navItems: NavItem[] = [
   { title: "Stats", href: "/stats", icon: BarChart3Icon, description: "Statistik pemain & tim" },
   { title: "Tim", href: "/teams", icon: ShieldIcon, description: "Daftar tim peserta" },
   { title: "Favorit", href: "/favorites", icon: StarIcon, description: "Tim & pemain favorit Anda" },
+  {
+    title: "Random Picker",
+    href: "/random-picker",
+    icon: DicesIcon,
+    description: "Undian pemenang acak & manual",
+  },
 ]

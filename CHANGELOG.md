@@ -2,6 +2,20 @@
 
 Semua perubahan penting pada project ini dicatat di sini.
 
+## [Unreleased] — 2026-08-15
+
+### Fitur
+
+- **Random Picker** — undian pemenang acak & manual dengan tracking antrian sukses
+  - Halaman `/random-picker`
+  - Tambah anggota (input multi-baris/koma), pilih pemenang acak (animasi slot-machine) atau manual
+  - Antrian sukses berurutan (nomor, metode, waktu) — tersimpan di `localStorage`
+  - Efek suara sintetis (Web Audio API, tanpa file eksternal) + toggle mute
+  - Animasi reveal & confetti (canvas) saat pemenang berhasil dipilih
+  - State: `hooks/use-random-picker.tsx`, `lib/random-picker.ts`
+  - Komponen: `components/random-picker-client.tsx`, `components/confetti-burst.tsx`
+  - Nav item **Random Picker** di sidebar
+
 ## [Unreleased] — 2026-07-11
 
 ### Mobile UX
