@@ -1,5 +1,5 @@
 export const SITE_URL =
-  process.env.NEXT_PUBLIC_SITE_URL ?? "https://wc2026.ponjong.workers.dev"
+  process.env.NEXT_PUBLIC_SITE_URL ?? "https://picker.ponjong.workers.dev"
 
 export const SITE_NAME = "Random Picker"
 export const SITE_TAGLINE = "Acak, Adil, Seru"

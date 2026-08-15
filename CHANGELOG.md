@@ -21,6 +21,9 @@ Kode sebelum pivot dibekukan di branch `archive/wc2026-monitor`.
   (`lib/seo/constants.ts`, `app/manifest.ts`, `app/icon.svg`,
   `app/opengraph-image.tsx`, `components/site-json-ld.tsx`)
 - `package.json` `name` → `random-picker`
+- Cloudflare Worker (`wrangler.jsonc` `name` & `WORKER_SELF_REFERENCE`) → `picker`,
+  jadi live URL berubah ke `https://picker.ponjong.workers.dev`. Worker `wc2026`
+  lama tidak dihapus otomatis — deploy `picker` membuat worker baru terpisah.
 
 ### Fitur
 

@@ -2,7 +2,7 @@
 
 Undian pemenang acak atau manual dari daftar anggota — lengkap dengan antrian sukses, animasi, dan efek suara. Cocok untuk giveaway, arisan, game, dan pembagian tugas. UI berbahasa Indonesia.
 
-**Live:** [https://wc2026.ponjong.workers.dev/](https://wc2026.ponjong.workers.dev/)
+**Live:** [https://picker.ponjong.workers.dev/](https://picker.ponjong.workers.dev/)
 
 Aplikasi ini sebelumnya adalah **World Cup 2026 Monitor**. Karena turnamennya sudah selesai, beranda sekarang jadi Random Picker — semua halaman WC 2026 masih ada di sidebar sebagai arsip. Kode asli WC2026 Monitor (sebelum pivot) dibekukan di branch [`archive/wc2026-monitor`](../../tree/archive/wc2026-monitor).
 
@@ -76,7 +76,7 @@ npm run build:cf
 npm run deploy:cf
 ```
 
-Worker: `wc2026` · Observability & logs aktif di Cloudflare Dashboard.
+Worker: `picker` · Observability & logs aktif di Cloudflare Dashboard.
 
 ## Struktur penting
 

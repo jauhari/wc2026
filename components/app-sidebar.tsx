@@ -112,7 +112,7 @@ export function AppSidebar() {
           <SidebarMenuItem>
             <div className="flex flex-col gap-1 px-2 py-1 group-data-[collapsible=icon]:hidden">
               <a
-                href="https://dash.cloudflare.com/?to=/:account/workers-and-pages/view/wc2026/production/observability"
+                href="https://dash.cloudflare.com/?to=/:account/workers-and-pages/view/picker/production/observability"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center gap-2 rounded-md py-1 text-xs text-sidebar-foreground/70 transition-colors hover:text-sidebar-accent-foreground"
