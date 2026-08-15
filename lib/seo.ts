@@ -22,7 +22,7 @@ const OG_IMAGE = {
   url: "/opengraph-image",
   width: 1200,
   height: 630,
-  alt: "World Cup 2026 Monitor — Pantau hasil, klasemen, jadwal & statistik",
+  alt: "Random Picker — undian pemenang acak & manual",
 }
 
 export function metadataWithKeywords(keywords: string[]): Metadata {

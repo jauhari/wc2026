@@ -2,10 +2,10 @@ import type { MetadataRoute } from "next"
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "World Cup 2026 Monitor — WE ARE 26",
-    short_name: "WC 2026",
+    name: "Random Picker — Acak, Adil, Seru",
+    short_name: "Random Picker",
     description:
-      "Pantau Piala Dunia 2026: hasil, klasemen, jadwal, bagan, dan statistik.",
+      "Undian pemenang acak atau manual dengan antrian sukses, animasi, dan efek suara.",
     start_url: "/",
     display: "standalone",
     background_color: "#1e2a6b",

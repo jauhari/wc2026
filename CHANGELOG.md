@@ -4,17 +4,33 @@ Semua perubahan penting pada project ini dicatat di sini.
 
 ## [Unreleased] — 2026-08-15
 
+### Pivot: Random Picker jadi aplikasi utama
+
+Piala Dunia FIFA 2026 sudah selesai, jadi beranda situs ini sekarang **Random
+Picker**. Semua halaman & data WC2026 tetap ada, dipindah jadi bagian arsip.
+Kode sebelum pivot dibekukan di branch `archive/wc2026-monitor`.
+
+- **Routing**
+  - `/` — sekarang Random Picker (sebelumnya beranda ringkasan turnamen)
+  - `/wc2026` — ringkasan turnamen WC2026 (dipindah dari `/`)
+  - Halaman lain (`/matches`, `/standings`, `/schedule`, `/bracket`,
+    `/stats`, `/teams`, `/favorites`) tidak berubah, sekarang dikelompokkan
+    sebagai "Piala Dunia 2026 · Arsip" di sidebar
+- **Branding** — nama situs, tagline, deskripsi SEO, manifest PWA, favicon,
+  Open Graph image, dan JSON-LD diganti ke identitas Random Picker
+  (`lib/seo/constants.ts`, `app/manifest.ts`, `app/icon.svg`,
+  `app/opengraph-image.tsx`, `components/site-json-ld.tsx`)
+- `package.json` `name` → `random-picker`
+
 ### Fitur
 
 - **Random Picker** — undian pemenang acak & manual dengan tracking antrian sukses
-  - Halaman `/random-picker`
   - Tambah anggota (input multi-baris/koma), pilih pemenang acak (animasi slot-machine) atau manual
   - Antrian sukses berurutan (nomor, metode, waktu) — tersimpan di `localStorage`
   - Efek suara sintetis (Web Audio API, tanpa file eksternal) + toggle mute
   - Animasi reveal & confetti (canvas) saat pemenang berhasil dipilih
   - State: `hooks/use-random-picker.tsx`, `lib/random-picker.ts`
   - Komponen: `components/random-picker-client.tsx`, `components/confetti-burst.tsx`
-  - Nav item **Random Picker** di sidebar
 
 ## [Unreleased] — 2026-07-11
 
