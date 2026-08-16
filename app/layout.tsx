@@ -2,7 +2,6 @@ import { Geist, Geist_Mono } from "next/font/google"
 
 import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
-import { FavoritesProvider } from "@/hooks/use-favorites"
 import { cn } from "@/lib/utils"
 import { AppSidebar } from "@/components/app-sidebar"
 import { AppHeader } from "@/components/app-header"
@@ -11,7 +10,6 @@ import { TooltipProvider } from "@/components/ui/tooltip"
 import { Toaster } from "@/components/ui/sonner"
 import { CloudflareAnalytics } from "@/components/cloudflare-analytics"
 import { SiteJsonLd } from "@/components/site-json-ld"
-import { TournamentAutoRefresh } from "@/components/tournament-auto-refresh"
 import { baseMetadata } from "@/lib/seo"
 
 const geist = Geist({ subsets: ["latin"], variable: "--font-sans" })
@@ -37,20 +35,17 @@ export default function RootLayout({
       <body>
         <SiteJsonLd />
         <ThemeProvider>
-          <FavoritesProvider>
-            <TooltipProvider>
-              <SidebarProvider>
-                <AppSidebar />
-                <SidebarInset className="min-w-0 overflow-x-hidden">
-                  <AppHeader />
-                  <main className="min-w-0 flex-1">{children}</main>
-                </SidebarInset>
-              </SidebarProvider>
-              <Toaster richColors position="top-right" />
-            </TooltipProvider>
-          </FavoritesProvider>
+          <TooltipProvider>
+            <SidebarProvider>
+              <AppSidebar />
+              <SidebarInset className="min-w-0 overflow-x-hidden">
+                <AppHeader />
+                <main className="min-w-0 flex-1">{children}</main>
+              </SidebarInset>
+            </SidebarProvider>
+            <Toaster richColors position="top-right" />
+          </TooltipProvider>
           <CloudflareAnalytics />
-          <TournamentAutoRefresh />
         </ThemeProvider>
       </body>
     </html>

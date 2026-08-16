@@ -5,10 +5,8 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { CloudIcon, DicesIcon } from "lucide-react"
 
-import { CountryFlag } from "@/components/country-flag"
 import { navItems } from "@/lib/nav"
 import { SITE_NAME, SITE_TAGLINE } from "@/lib/seo/constants"
-import { hostNations } from "@/lib/data/stadiums"
 import {
   Sidebar,
   SidebarContent,
@@ -33,9 +31,6 @@ export function AppSidebar() {
   const closeMobileSidebar = () => {
     if (isMobile) setOpenMobile(false)
   }
-
-  const mainItems = navItems.filter((item) => !item.archive)
-  const archiveItems = navItems.filter((item) => item.archive)
 
   const renderItem = (item: (typeof navItems)[number]) => {
     const active =
@@ -78,31 +73,7 @@ export function AppSidebar() {
         <SidebarGroup>
           <SidebarGroupLabel>Navigasi</SidebarGroupLabel>
           <SidebarGroupContent>
-            <SidebarMenu>{mainItems.map(renderItem)}</SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-
-        <SidebarGroup>
-          <SidebarGroupLabel>Piala Dunia 2026 · Arsip</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>{archiveItems.map(renderItem)}</SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-
-        <SidebarGroup className="mt-auto">
-          <SidebarGroupLabel>Tuan Rumah WC 2026</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <div className="flex flex-col gap-1 px-2">
-              {hostNations.map((n) => (
-                <div
-                  key={n.code}
-                  className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm"
-                >
-                  <CountryFlag code={n.flag} size="sm" title={n.name} />
-                  <span className="text-sidebar-foreground/80">{n.name}</span>
-                </div>
-              ))}
-            </div>
+            <SidebarMenu>{navItems.map(renderItem)}</SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
@@ -141,7 +112,7 @@ export function AppSidebar() {
   )
 }
 
-/** Subtle United 2026 tricolor accent strip (green | blue | red) */
+/** Subtle brand accent strip (green | blue | red) */
 function TricolorStrip() {
   return (
     <div

@@ -2,6 +2,37 @@
 
 Semua perubahan penting pada project ini dicatat di sini.
 
+## [Unreleased] — 2026-08-16 (2)
+
+### Hapus total arsip WC2026
+
+Menyusul pivot sebelumnya, arsip Piala Dunia 2026 sekarang dihapus penuh —
+proyek ini murni Random Picker. Kode WC2026 sebelumnya tetap tersedia di
+branch `archive/wc2026-monitor` kalau dibutuhkan lagi.
+
+- **Routing** — halaman `/wc2026`, `/matches`, `/standings`, `/schedule`,
+  `/bracket`, `/stats`, `/teams`, `/favorites`, dan API `/api/tournament`
+  dihapus. Sidebar sekarang hanya berisi satu item: Random Picker
+- **Komponen, hook, lib WC2026 dihapus**: `bracket-client`, `favorites-*`,
+  `match-*`, `matches-client`, `schedule-client`, `stats-*`, `team-*`,
+  `teams-client`, `tournament-auto-refresh`, `country-flag`,
+  `data-freshness`, `use-favorites`, `lib/api/*` (openfootball, FIFA,
+  BallDontLie), `lib/data/*` (tournament, stadiums, dll), dan tipe terkait
+  di `lib/types.ts`
+- **UI primitives yang jadi tak terpakai ikut dihapus**: `avatar`, `chart`
+  (+ dependency `recharts`), `progress`, `scroll-area`, `select`,
+  `toggle`/`toggle-group`
+- **Data & script**: `data/openfootball-2026.json`,
+  `scripts/sync-data.mjs`, `scripts/sync-keywords.mjs` dihapus.
+  `data/trends-keywords.json` diisi ulang dengan keyword SEO relevan
+  Random Picker (sebelumnya berisi keyword Piala Dunia)
+- `app/sitemap.ts` disederhanakan (tidak lagi bergantung data turnamen),
+  `lib/seo.ts` kehilangan fungsi metadata yang sudah tidak dipakai
+- `next.config.ts`: hapus `images.remotePatterns` untuk `flagcdn.com`
+- `.env.example`: hapus `BALLDONTLIE_API_KEY`
+- Build sekarang 100% statis — semua rute pre-render tanpa fetch data
+  server saat runtime
+
 ## [Unreleased] — 2026-08-16
 
 ### Random Picker: CRUD anggota & timeline

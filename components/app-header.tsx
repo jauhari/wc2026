@@ -5,7 +5,6 @@ import { usePathname } from "next/navigation"
 import { MoonIcon, SunIcon } from "lucide-react"
 import { useTheme } from "next-themes"
 
-import { DataFreshness } from "@/components/data-freshness"
 import { navItems } from "@/lib/nav"
 import { Separator } from "@/components/ui/separator"
 import { SidebarTrigger } from "@/components/ui/sidebar"
@@ -35,7 +34,6 @@ export function AppHeader() {
             </span>
           </div>
         </div>
-        <DataFreshness />
         <Button
           variant="ghost"
           size="icon"

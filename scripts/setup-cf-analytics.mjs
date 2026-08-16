@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Provision Cloudflare Web Analytics for wc2026.ponjong.workers.dev
+ * Provision Cloudflare Web Analytics for picker.ponjong.workers.dev
  * and write NEXT_PUBLIC_CF_WEB_ANALYTICS_TOKEN to .env.local
  */
 import fs from "node:fs"
@@ -8,7 +8,7 @@ import os from "node:os"
 import path from "node:path"
 
 const ACCOUNT_ID = "90d799d642a9813692459fd3b9d403b4"
-const HOST = "wc2026.ponjong.workers.dev"
+const HOST = "picker.ponjong.workers.dev"
 const ROOT = path.resolve(import.meta.dirname, "..")
 const ENV_LOCAL = path.join(ROOT, ".env.local")
 
@@ -121,7 +121,7 @@ main().catch((err) => {
     console.log("API token tidak punya akses Web Analytics.")
     console.log("Setup manual:")
     console.log("1. Buka https://dash.cloudflare.com/?to=/:account/web-analytics")
-    console.log("2. Add a site → hostname: wc2026.ponjong.workers.dev")
+    console.log("2. Add a site → hostname: picker.ponjong.workers.dev")
     console.log("3. Manage site → salin site token")
     console.log("4. Tambahkan ke .env.local:")
     console.log("   NEXT_PUBLIC_CF_WEB_ANALYTICS_TOKEN=<token>")
