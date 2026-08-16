@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#3CAC3B"/>
+      <stop offset="100%" stop-color="#2A398D"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)"/>
+
+  <g transform="translate(64,64)">
+    <rect width="72" height="72" rx="18" fill="rgba(255,255,255,0.92)"/>
+    <text x="36" y="50" text-anchor="middle" font-size="40" font-family="system-ui, sans-serif">🎲</text>
+    <text x="90" y="45" font-size="28" font-weight="700" fill="#ffffff" fill-opacity="0.9" font-family="system-ui, sans-serif">Random Picker</text>
+  </g>
+
+  <g font-family="system-ui, sans-serif" fill="#ffffff">
+    <text x="64" y="330" font-size="64" font-weight="900">Acak, Adil, Seru</text>
+    <text x="64" y="390" font-size="32" fill-opacity="0.92">Pilih pemenang acak atau manual · antrian sukses</text>
+    <text x="64" y="432" font-size="22" fill-opacity="0.75">Animasi &amp; efek suara · cocok untuk giveaway, arisan, dan game</text>
+  </g>
+
+  <g transform="translate(64,566)">
+    <circle cx="6" cy="6" r="6" fill="#E61D25"/>
+    <circle cx="30" cy="6" r="6" fill="#FFFFFF"/>
+    <circle cx="54" cy="6" r="6" fill="#2A398D"/>
+    <circle cx="78" cy="6" r="6" fill="#3CAC3B"/>
+  </g>
+</svg>

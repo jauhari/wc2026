@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 180" role="img" aria-label="Random Picker">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#3CAC3B"/>
+      <stop offset="55%" stop-color="#2A398D"/>
+      <stop offset="100%" stop-color="#1e2a6b"/>
+    </linearGradient>
+  </defs>
+  <rect width="180" height="180" rx="40" fill="url(#bg)"/>
+  <circle cx="150" cy="30" r="55" fill="rgba(255,255,255,0.12)"/>
+  <circle cx="25" cy="155" r="40" fill="rgba(230,29,37,0.15)"/>
+  <rect x="38" y="38" width="104" height="104" rx="22" fill="#FFFFFF"/>
+  <circle cx="63" cy="63" r="10" fill="#2A398D"/>
+  <circle cx="117" cy="63" r="10" fill="#2A398D"/>
+  <circle cx="90" cy="90" r="10" fill="#E61D25"/>
+  <circle cx="63" cy="117" r="10" fill="#2A398D"/>
+  <circle cx="117" cy="117" r="10" fill="#2A398D"/>
+</svg>
