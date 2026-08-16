@@ -2,6 +2,92 @@
 
 Semua perubahan penting pada project ini dicatat di sini.
 
+## [Unreleased] — 2026-08-16 (2)
+
+### Hapus total arsip WC2026
+
+Menyusul pivot sebelumnya, arsip Piala Dunia 2026 sekarang dihapus penuh —
+proyek ini murni Random Picker. Kode WC2026 sebelumnya tetap tersedia di
+branch `archive/wc2026-monitor` kalau dibutuhkan lagi.
+
+- **Routing** — halaman `/wc2026`, `/matches`, `/standings`, `/schedule`,
+  `/bracket`, `/stats`, `/teams`, `/favorites`, dan API `/api/tournament`
+  dihapus. Sidebar sekarang hanya berisi satu item: Random Picker
+- **Komponen, hook, lib WC2026 dihapus**: `bracket-client`, `favorites-*`,
+  `match-*`, `matches-client`, `schedule-client`, `stats-*`, `team-*`,
+  `teams-client`, `tournament-auto-refresh`, `country-flag`,
+  `data-freshness`, `use-favorites`, `lib/api/*` (openfootball, FIFA,
+  BallDontLie), `lib/data/*` (tournament, stadiums, dll), dan tipe terkait
+  di `lib/types.ts`
+- **UI primitives yang jadi tak terpakai ikut dihapus**: `avatar`, `chart`
+  (+ dependency `recharts`), `progress`, `scroll-area`, `select`,
+  `toggle`/`toggle-group`
+- **Data & script**: `data/openfootball-2026.json`,
+  `scripts/sync-data.mjs`, `scripts/sync-keywords.mjs` dihapus.
+  `data/trends-keywords.json` diisi ulang dengan keyword SEO relevan
+  Random Picker (sebelumnya berisi keyword Piala Dunia)
+- `app/sitemap.ts` disederhanakan (tidak lagi bergantung data turnamen),
+  `lib/seo.ts` kehilangan fungsi metadata yang sudah tidak dipakai
+- `next.config.ts`: hapus `images.remotePatterns` untuk `flagcdn.com`
+- `.env.example`: hapus `BALLDONTLIE_API_KEY`
+- Build sekarang 100% statis — semua rute pre-render tanpa fetch data
+  server saat runtime
+
+## [Unreleased] — 2026-08-16
+
+### Random Picker: CRUD anggota & timeline
+
+- **Data anggota diperluas** — tiap anggota kini punya Nama, No. HP, dan
+  Posisi (bukan cuma nama)
+- **CRUD lengkap** di tab Anggota:
+  - Tambah anggota detail (Nama/HP/Posisi) lewat sheet form, atau Tambah
+    Cepat (paste banyak nama sekaligus, HP/posisi bisa diisi belakangan)
+  - Edit anggota (ikon pensil) — ubah nama/HP/posisi kapan saja
+  - Hapus per anggota atau hapus semua
+  - Daftar anggota ditampilkan sebagai tabel (Nama, No. HP, Posisi, Status,
+    Aksi) bukan list sederhana
+- **Timeline pengundian** — tab "Antrian Sukses" diganti jadi **Timeline**
+  bergaya linimasa (node bernomor + garis penghubung), menampilkan posisi/HP
+  anggota dan waktu lengkap (tanggal + jam) tiap kali ada yang terpilih
+- File baru: `components/member-form-sheet.tsx`, `components/picker-timeline.tsx`
+- `lib/random-picker.ts`: tipe `PickerMember` tambah `phone`/`position`,
+  migrasi otomatis data lama yang belum punya field ini
+- `hooks/use-random-picker.tsx`: tambah `addMember`/`updateMember` untuk
+  create/update terstruktur
+
+## [Unreleased] — 2026-08-15
+
+### Pivot: Random Picker jadi aplikasi utama
+
+Piala Dunia FIFA 2026 sudah selesai, jadi beranda situs ini sekarang **Random
+Picker**. Semua halaman & data WC2026 tetap ada, dipindah jadi bagian arsip.
+Kode sebelum pivot dibekukan di branch `archive/wc2026-monitor`.
+
+- **Routing**
+  - `/` — sekarang Random Picker (sebelumnya beranda ringkasan turnamen)
+  - `/wc2026` — ringkasan turnamen WC2026 (dipindah dari `/`)
+  - Halaman lain (`/matches`, `/standings`, `/schedule`, `/bracket`,
+    `/stats`, `/teams`, `/favorites`) tidak berubah, sekarang dikelompokkan
+    sebagai "Piala Dunia 2026 · Arsip" di sidebar
+- **Branding** — nama situs, tagline, deskripsi SEO, manifest PWA, favicon,
+  Open Graph image, dan JSON-LD diganti ke identitas Random Picker
+  (`lib/seo/constants.ts`, `app/manifest.ts`, `app/icon.svg`,
+  `app/opengraph-image.tsx`, `components/site-json-ld.tsx`)
+- `package.json` `name` → `random-picker`
+- Cloudflare Worker (`wrangler.jsonc` `name` & `WORKER_SELF_REFERENCE`) → `picker`,
+  jadi live URL berubah ke `https://picker.ponjong.workers.dev`. Worker `wc2026`
+  lama tidak dihapus otomatis — deploy `picker` membuat worker baru terpisah.
+
+### Fitur
+
+- **Random Picker** — undian pemenang acak & manual dengan tracking antrian sukses
+  - Tambah anggota (input multi-baris/koma), pilih pemenang acak (animasi slot-machine) atau manual
+  - Antrian sukses berurutan (nomor, metode, waktu) — tersimpan di `localStorage`
+  - Efek suara sintetis (Web Audio API, tanpa file eksternal) + toggle mute
+  - Animasi reveal & confetti (canvas) saat pemenang berhasil dipilih
+  - State: `hooks/use-random-picker.tsx`, `lib/random-picker.ts`
+  - Komponen: `components/random-picker-client.tsx`, `components/confetti-burst.tsx`
+
 ## [Unreleased] — 2026-07-11
 
 ### Mobile UX

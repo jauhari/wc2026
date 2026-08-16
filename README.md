@@ -1,37 +1,30 @@
-# World Cup 2026 Monitor
+# Random Picker
 
-Pantau Piala Dunia FIFA 2026 — hasil pertandingan, klasemen, jadwal, bagan guguran, dan statistik. UI berbahasa Indonesia, waktu dalam WIB.
+Undian pemenang acak atau manual dari daftar anggota — lengkap dengan CRUD anggota (nama, No. HP, posisi), timeline pengundian, animasi, dan efek suara. Cocok untuk giveaway, arisan, game, dan pembagian tugas. UI berbahasa Indonesia.
 
-**Live:** [https://wc2026.ponjong.workers.dev/](https://wc2026.ponjong.workers.dev/)
+**Live:** [https://picker.ponjong.workers.dev/](https://picker.ponjong.workers.dev/)
+
+> Repo ini sebelumnya adalah **World Cup 2026 Monitor**. Setelah turnamennya selesai, seluruh kode & halaman WC2026 dilepas — proyek ini sekarang murni Random Picker. Kode WC2026 Monitor (sebelum pivot) tetap dibekukan di branch [`archive/wc2026-monitor`](../../tree/archive/wc2026-monitor) kalau suatu saat dibutuhkan lagi.
 
 ## Fitur
 
-- **Beranda** — ringkasan turnamen, pertandingan live & mendatang, top skor, section favorit
-- **Hasil** — filter live / selesai / terjadwal
-- **Klasemen** — 12 grup (A–L)
-- **Jadwal** — semua 104 pertandingan per hari
-- **Bagan** — knockout R32 → Final, mode mobile:
-  - **Per babak** — pilih babak (chip + panah), kartu full width
-  - **Bagan penuh** — scroll horizontal semua kolom + tombol panah
-- **Stats** — top skor, top assist, grafik gol per grup
-- **Tim** — profil 48 tim peserta + detail per tim
-- **Favorit** — tandai tim & pemain (disimpan di `localStorage`)
-- **Auto-refresh** — data turnamen diperbarui di client (lebih cepat saat ada laga live)
-- **Data freshness** — indikator sumber & timestamp di header
-- **SEO** — metadata, sitemap, robots, Open Graph, keywords (Trends + Suggest)
+- **Kelola anggota (CRUD)** — tambah detail (Nama, No. HP, Posisi) lewat form, atau tambah cepat (paste banyak nama sekaligus); edit & hapus kapan saja
+- **Undian acak** — animasi slot-machine sebelum berhenti di pemenang
+- **Pilih manual** — tombol "Pilih" langsung per anggota
+- **Timeline pengundian** — riwayat pemenang berurutan (nomor, metode, waktu, posisi/HP), bukan asal pilih tanpa jejak
+- **Confetti + efek suara** — animasi reveal & fanfare sintetis (Web Audio API, tanpa file eksternal) saat pemenang terpilih, dengan toggle mute
+- **Client-only** — semua data tersimpan di `localStorage` perangkat Anda, tidak ada backend/database
 
 ## Stack
 
 - Next.js 16 + React 19 + shadcn/ui + Tailwind CSS 4
 - Deploy: [OpenNext Cloudflare](https://opennext.js.org/cloudflare) → Cloudflare Workers
-- Data: [openfootball/worldcup.json](https://github.com/openfootball/worldcup.json) + FIFA API (gratis) + BallDontLie (opsional)
 
 ## Development
 
 ```bash
 npm install
 npm run dev          # http://localhost:3260
-npm run sync-data    # tarik data terbaru dari openfootball
 npm run typecheck
 npm run lint
 ```
@@ -42,7 +35,6 @@ Salin `.env.example` ke `.env.local`:
 
 | Variable | Wajib | Keterangan |
 |----------|-------|------------|
-| `BALLDONTLIE_API_KEY` | Opsional | Live score & assist dari BallDontLie (GOAT tier) |
 | `NEXT_PUBLIC_SITE_URL` | Opsional | URL publik untuk SEO / OG (default live Workers) |
 | `NEXT_PUBLIC_CF_WEB_ANALYTICS_TOKEN` | Opsional | Cloudflare Web Analytics beacon |
 
@@ -56,10 +48,8 @@ npm run setup:cf-analytics   # otomatis provision token (butuh scope Web Analyti
 |---------|--------|
 | `npm run dev` | Dev server (port 3260) |
 | `npm run build` | Build Next.js lokal |
-| `npm run build:cf` | Sync data + keywords, build OpenNext untuk Workers |
+| `npm run build:cf` | Build OpenNext untuk Workers |
 | `npm run deploy:cf` | Deploy artifact `.open-next` ke Cloudflare |
-| `npm run sync-data` | Tarik jadwal/skor openfootball → `data/openfootball-2026.json` |
-| `npm run sync-keywords` | Refresh keyword SEO |
 | `npm run lint` | ESLint |
 | `npm run typecheck` | TypeScript check |
 
@@ -68,59 +58,29 @@ npm run setup:cf-analytics   # otomatis provision token (butuh scope Web Analyti
 ## Deploy ke Cloudflare
 
 ```bash
-# Secret runtime (sekali saja, jika dipakai)
-npx wrangler secret put BALLDONTLIE_API_KEY
-
-# Build & deploy
 npm run build:cf
 npm run deploy:cf
 ```
 
-Worker: `wc2026` · Observability & logs aktif di Cloudflare Dashboard.
-
-## Arsitektur data (ringkas)
-
-```
-openfootball (remote, cache ~60s)
-    ↓ fallback: data/openfootball-2026.json (bundled)
-transform (lib/data/tournament.ts)
-    + FIFA live overlay / assist (timeout 1.5s)
-    + BallDontLie (opsional)
-    ↓
-TournamentData → pages / API / client refresh
-```
-
-| Layer | TTL / interval |
-|-------|----------------|
-| Memory turnamen (Worker) | 30s |
-| openfootball remote | 60s |
-| Overlay FIFA | 30s |
-| Client refresh (live) | 15s |
-| Client refresh (normal) | 30s |
-
-Endpoint ringkas: `GET /api/tournament` (live count, source, total goals).
+Worker: `picker` · Observability & logs aktif di Cloudflare Dashboard.
 
 ## Struktur penting
 
 ```
-app/                 # App Router (pages + api/tournament)
-components/          # UI + bracket-client, favorites, auto-refresh
-hooks/               # use-favorites, use-mobile
+app/
+  page.tsx                    # Random Picker (satu-satunya halaman)
+components/
+  random-picker-client.tsx    # UI utama: stage acak, tabel anggota, tab timeline
+  member-form-sheet.tsx       # Form tambah/edit anggota
+  picker-timeline.tsx         # Linimasa riwayat pengundian
+  confetti-burst.tsx          # Efek confetti canvas
+hooks/
+  use-random-picker.tsx       # State CRUD anggota & antrian (localStorage)
 lib/
-  api/               # openfootball, fifa, balldontlie
-  data/              # tournament transform, cache, meta, constants
-  seo/               # metadata & keywords
-data/                # openfootball + trends keywords (bundled)
-scripts/             # sync-data, sync-keywords, setup CF analytics
+  random-picker.ts            # Tipe & util Random Picker
+  audio/picker-sounds.ts      # Efek suara sintetis (Web Audio API)
+  seo/                        # Metadata & keyword SEO
 ```
-
-## Sumber data
-
-1. **openfootball** — jadwal, skor, pencetak gol (utama)
-2. **FIFA API** — overlay skor live & statistik assist (gratis, tanpa key)
-3. **BallDontLie** — override live & assist jika API key tersedia
-
-Favorit bersifat client-only (tidak ada backend user).
 
 ## Changelog
 

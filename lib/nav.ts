@@ -1,13 +1,4 @@
-import {
-  HomeIcon,
-  TrophyIcon,
-  ListOrderedIcon,
-  CalendarDaysIcon,
-  NetworkIcon,
-  BarChart3Icon,
-  ShieldIcon,
-  StarIcon,
-} from "lucide-react"
+import { DicesIcon } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
 
 export interface NavItem {
@@ -18,12 +9,10 @@ export interface NavItem {
 }
 
 export const navItems: NavItem[] = [
-  { title: "Beranda", href: "/", icon: HomeIcon, description: "Ringkasan turnamen" },
-  { title: "Hasil", href: "/matches", icon: TrophyIcon, description: "Hasil pertandingan" },
-  { title: "Klasemen", href: "/standings", icon: ListOrderedIcon, description: "Klasemen grup" },
-  { title: "Jadwal", href: "/schedule", icon: CalendarDaysIcon, description: "Jadwal pertandingan" },
-  { title: "Bagan", href: "/bracket", icon: NetworkIcon, description: "Bagan guguran" },
-  { title: "Stats", href: "/stats", icon: BarChart3Icon, description: "Statistik pemain & tim" },
-  { title: "Tim", href: "/teams", icon: ShieldIcon, description: "Daftar tim peserta" },
-  { title: "Favorit", href: "/favorites", icon: StarIcon, description: "Tim & pemain favorit Anda" },
+  {
+    title: "Random Picker",
+    href: "/",
+    icon: DicesIcon,
+    description: "Undian pemenang acak & manual",
+  },
 ]
