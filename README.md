@@ -1,32 +1,35 @@
 # Random Picker
 
-Undian pemenang acak atau manual dari daftar anggota — lengkap dengan CRUD anggota (nama, No. HP, posisi), timeline pengundian, animasi, dan efek suara. Cocok untuk giveaway, arisan, game, dan pembagian tugas. UI berbahasa Indonesia.
+Undian pemenang acak atau manual dari daftar anggota — CRUD anggota (nama, No. HP, posisi), timeline pengundian, animasi, dan efek suara. Cocok untuk giveaway, arisan, game, dan pembagian tugas. UI berbahasa Indonesia.
 
 **Live:** [https://picker.ponjong.workers.dev/](https://picker.ponjong.workers.dev/)
 
-> Repo ini sebelumnya adalah **World Cup 2026 Monitor**. Setelah turnamennya selesai, seluruh kode & halaman WC2026 dilepas — proyek ini sekarang murni Random Picker. Kode WC2026 Monitor (sebelum pivot) tetap dibekukan di branch [`archive/wc2026-monitor`](../../tree/archive/wc2026-monitor) kalau suatu saat dibutuhkan lagi.
+> Versi ini adalah migrasi dari implementasi Next.js/React ke **SvelteKit + Svelte 5 (runes) + Tailwind CSS 4**, dengan fitur 100% setara. Kode Next.js sebelumnya ada di branch `claude/random-picker-app-4d9qvd`; snapshot World Cup 2026 Monitor (sebelum jadi Random Picker sama sekali) ada di `archive/wc2026-monitor`.
 
 ## Fitur
 
 - **Kelola anggota (CRUD)** — tambah detail (Nama, No. HP, Posisi) lewat form, atau tambah cepat (paste banyak nama sekaligus); edit & hapus kapan saja
 - **Undian acak** — animasi slot-machine sebelum berhenti di pemenang
 - **Pilih manual** — tombol "Pilih" langsung per anggota
-- **Timeline pengundian** — riwayat pemenang berurutan (nomor, metode, waktu, posisi/HP), bukan asal pilih tanpa jejak
-- **Confetti + efek suara** — animasi reveal & fanfare sintetis (Web Audio API, tanpa file eksternal) saat pemenang terpilih, dengan toggle mute
+- **Timeline pengundian** — riwayat pemenang berurutan (nomor, metode, waktu, posisi/HP)
+- **Confetti + efek suara** — animasi reveal & fanfare sintetis (Web Audio API, tanpa file eksternal), dengan toggle mute
+- **Dark/light mode** — otomatis mengikuti sistem, bisa di-toggle manual (atau tekan `d`)
 - **Client-only** — semua data tersimpan di `localStorage` perangkat Anda, tidak ada backend/database
 
 ## Stack
 
-- Next.js 16 + React 19 + shadcn/ui + Tailwind CSS 4
-- Deploy: [OpenNext Cloudflare](https://opennext.js.org/cloudflare) → Cloudflare Workers
+- SvelteKit + Svelte 5 (runes) + Tailwind CSS 4
+- Ikon: [`@lucide/svelte`](https://lucide.dev) · Toast: [`svelte-sonner`](https://github.com/wobsoriano/svelte-sonner)
+- Deploy: [`@sveltejs/adapter-cloudflare`](https://svelte.dev/docs/kit/adapter-cloudflare) → Cloudflare Workers
 
 ## Development
 
 ```bash
 npm install
-npm run dev          # http://localhost:3260
-npm run typecheck
-npm run lint
+npm run dev       # http://localhost:3260
+npm run check     # svelte-check + typecheck
+npm run lint      # ESLint
+npm run format    # Prettier
 ```
 
 ## Environment
@@ -35,51 +38,41 @@ Salin `.env.example` ke `.env.local`:
 
 | Variable | Wajib | Keterangan |
 |----------|-------|------------|
-| `NEXT_PUBLIC_SITE_URL` | Opsional | URL publik untuk SEO / OG (default live Workers) |
-| `NEXT_PUBLIC_CF_WEB_ANALYTICS_TOKEN` | Opsional | Cloudflare Web Analytics beacon |
-
-```bash
-npm run setup:cf-analytics   # otomatis provision token (butuh scope Web Analytics)
-```
-
-## Scripts
-
-| Command | Fungsi |
-|---------|--------|
-| `npm run dev` | Dev server (port 3260) |
-| `npm run build` | Build Next.js lokal |
-| `npm run build:cf` | Build OpenNext untuk Workers |
-| `npm run deploy:cf` | Deploy artifact `.open-next` ke Cloudflare |
-| `npm run lint` | ESLint |
-| `npm run typecheck` | TypeScript check |
-
-> **Catatan deploy:** jalankan `npm run build:cf` dulu, baru `npm run deploy:cf`. Deploy saja tanpa rebuild dapat mengunggah build lama.
+| `PUBLIC_SITE_URL` | Opsional | URL publik untuk SEO / OG (default live Workers) |
+| `PUBLIC_CF_WEB_ANALYTICS_TOKEN` | Opsional | Cloudflare Web Analytics beacon |
 
 ## Deploy ke Cloudflare
 
 ```bash
-npm run build:cf
-npm run deploy:cf
+npm run deploy
 ```
 
-Worker: `picker` · Observability & logs aktif di Cloudflare Dashboard.
+Setara dengan `npm run build && wrangler deploy`. Worker: `picker` · Observability & logs aktif di Cloudflare Dashboard.
 
 ## Struktur penting
 
 ```
-app/
-  page.tsx                    # Random Picker (satu-satunya halaman)
-components/
-  random-picker-client.tsx    # UI utama: stage acak, tabel anggota, tab timeline
-  member-form-sheet.tsx       # Form tambah/edit anggota
-  picker-timeline.tsx         # Linimasa riwayat pengundian
-  confetti-burst.tsx          # Efek confetti canvas
-hooks/
-  use-random-picker.tsx       # State CRUD anggota & antrian (localStorage)
-lib/
-  random-picker.ts            # Tipe & util Random Picker
-  audio/picker-sounds.ts      # Efek suara sintetis (Web Audio API)
-  seo/                        # Metadata & keyword SEO
+src/
+  app.html                        # Shell HTML — blocking theme script (anti-FOUC)
+  app.css                         # Tailwind v4 theme tokens, keyframes animasi
+  routes/
+    +layout.svelte                # Toaster, analytics, shortcut tema
+    +page.svelte                  # Satu-satunya halaman — semua UI & logika Random Picker
+    sitemap.xml/+server.ts        # Sitemap dinamis
+  lib/
+    types.ts                      # Tipe data & util parsing (framework-agnostic)
+    constants.ts                  # SITE_NAME/URL/DESCRIPTION/KEYWORDS
+    audio/picker-sounds.ts        # Efek suara sintetis (Web Audio API)
+    stores/
+      picker.svelte.ts            # State CRUD anggota & antrian (runes + localStorage)
+      theme.svelte.ts             # State dark/light + shortcut "d"
+    components/
+      Button.svelte, Badge.svelte, EmptyState.svelte, Modal.svelte  # Primitif Tailwind native
+      MemberForm.svelte           # Form tambah/edit anggota (dipakai di dalam Modal)
+      PickerTimeline.svelte       # Linimasa riwayat pengundian
+      ConfettiBurst.svelte        # Efek confetti canvas
+static/
+  icon.svg, apple-icon.svg, og-image.svg, manifest.webmanifest, robots.txt
 ```
 
 ## Changelog

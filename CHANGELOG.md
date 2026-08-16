@@ -2,6 +2,55 @@
 
 Semua perubahan penting pada project ini dicatat di sini.
 
+## [Unreleased] — 2026-08-16 (4)
+
+### Import/export data & edit riwayat pengundian (SvelteKit)
+
+- **Menu Data** (dropdown di header) — ekspor & impor:
+  - Ekspor backup lengkap (.json) — anggota + riwayat pengundian
+  - Ekspor daftar anggota (.csv) — bisa dibuka/diedit di Excel
+  - Impor backup (.json) — memulihkan/menimpa seluruh data (dengan konfirmasi)
+  - Impor anggota (.csv) — tambah anggota massal dari spreadsheet, duplikat nama dilewati
+- **Edit entri Timeline** — tombol edit (pensil) per entri pengundian, buka form untuk
+  mengubah **tanggal & jam menang** dan metode (Acak/Manual)
+- File baru: `src/lib/data-io.ts` (helper CSV/unduh file),
+  `src/lib/components/DataMenu.svelte`, `src/lib/components/HistoryEditForm.svelte`
+- `src/lib/stores/picker.svelte.ts`: tambah `importMembers`, `restoreBackup`,
+  `updateHistoryEntry`
+
+## [Unreleased] — 2026-08-16 (3)
+
+### Migrasi ke SvelteKit + Svelte 5 + Tailwind CSS 4
+
+Seluruh aplikasi Random Picker (Next.js/React) dimigrasi penuh ke
+**SvelteKit + Svelte 5 (runes) + Tailwind CSS 4**, dengan paritas fitur
+100%. Kode Next.js sebelumnya tetap tersedia di branch
+`claude/random-picker-app-4d9qvd`.
+
+- **State**: `useState`/`useSyncExternalStore` → kelas berbasis `$state`/
+  `$derived` di `src/lib/stores/picker.svelte.ts` (`src/lib/stores/theme.svelte.ts`
+  untuk dark/light mode + shortcut `d`)
+- **Komponen**: shadcn/ui (Radix-based) → primitif Tailwind native
+  (`Button`, `Badge`, `EmptyState`) + `<dialog>` native untuk modal
+  tambah/edit anggota (menggantikan Sheet)
+- **Ikon**: `lucide-react` → `@lucide/svelte`; **Toast**: `sonner` →
+  `svelte-sonner`
+- **Routing**: App Router (`app/page.tsx`) → satu route di
+  `src/routes/+page.svelte`, semua logika & UI dalam satu file sesuai
+  arsitektur "single, clean" yang diminta
+- **SEO**: `generateMetadata`/`ImageResponse` → blok `<svelte:head>`
+  lengkap (title, description, OG, Twitter card, JSON-LD) + OG image
+  statis (`static/og-image.svg`), sitemap dinamis di
+  `src/routes/sitemap.xml/+server.ts`
+- **Deploy**: OpenNext Cloudflare → `@sveltejs/adapter-cloudflare`
+  (`wrangler.jsonc` disesuaikan, binding `WORKER_SELF_REFERENCE` yang
+  khusus OpenNext dihapus karena tidak relevan untuk SvelteKit)
+- **localStorage key dipertahankan** (`wc2026-random-picker`,
+  `wc2026-random-picker-muted`) — data anggota & antrian pengguna lama
+  otomatis terbaca di versi baru (domain sama)
+- Build sekarang menghasilkan bundle client yang jauh lebih kecil (total
+  ~60KB gzip di seluruh chunk) dibanding build Next.js sebelumnya
+
 ## [Unreleased] — 2026-08-16 (2)
 
 ### Hapus total arsip WC2026
