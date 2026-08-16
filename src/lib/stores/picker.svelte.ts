@@ -138,6 +138,56 @@ class PickerStore {
     this.history = [...this.history, entry];
     this.#persist();
   }
+
+  /** Ubah entri antrian sukses — tanggal/jam menang dan/atau metode. */
+  updateHistoryEntry(
+    id: string,
+    input: { pickedAt: number; method: PickerHistoryEntry["method"] }
+  ) {
+    this.history = this.history.map((h) =>
+      h.id === id ? { ...h, pickedAt: input.pickedAt, method: input.method } : h
+    );
+    this.#persist();
+    toast.success("Data pemenang diperbarui");
+  }
+
+  /** Impor anggota (mis. dari CSV) — anggota dengan nama yang sudah ada dilewati. */
+  importMembers(inputs: MemberInput[]) {
+    if (inputs.length === 0) return;
+    // eslint-disable-next-line svelte/prefer-svelte-reactivity -- local, discarded after this call
+    const existingKeys = new Set(this.members.map((m) => m.name.toLowerCase()));
+    const added: PickerMember[] = [];
+    for (const input of inputs) {
+      const name = input.name.trim();
+      if (!name) continue;
+      const key = name.toLowerCase();
+      if (existingKeys.has(key)) continue;
+      existingKeys.add(key);
+      added.push({
+        id: makeId(),
+        name,
+        phone: input.phone?.trim() ?? "",
+        position: input.position?.trim() ?? "",
+      });
+    }
+    if (added.length === 0) {
+      toast.info("Tidak ada anggota baru untuk diimpor (nama sudah ada semua)");
+      return;
+    }
+    this.members = [...this.members, ...added];
+    this.#persist();
+    toast.success(`${added.length} anggota diimpor`);
+  }
+
+  /** Timpa seluruh anggota & antrian dengan backup JSON yang diimpor. */
+  restoreBackup(state: PickerState) {
+    this.members = state.members;
+    this.history = state.history;
+    this.#persist();
+    toast.success(
+      `Backup dipulihkan: ${state.members.length} anggota, ${state.history.length} riwayat`
+    );
+  }
 }
 
 export const picker = new PickerStore();

@@ -2,6 +2,22 @@
 
 Semua perubahan penting pada project ini dicatat di sini.
 
+## [Unreleased] — 2026-08-16 (4)
+
+### Import/export data & edit riwayat pengundian (SvelteKit)
+
+- **Menu Data** (dropdown di header) — ekspor & impor:
+  - Ekspor backup lengkap (.json) — anggota + riwayat pengundian
+  - Ekspor daftar anggota (.csv) — bisa dibuka/diedit di Excel
+  - Impor backup (.json) — memulihkan/menimpa seluruh data (dengan konfirmasi)
+  - Impor anggota (.csv) — tambah anggota massal dari spreadsheet, duplikat nama dilewati
+- **Edit entri Timeline** — tombol edit (pensil) per entri pengundian, buka form untuk
+  mengubah **tanggal & jam menang** dan metode (Acak/Manual)
+- File baru: `src/lib/data-io.ts` (helper CSV/unduh file),
+  `src/lib/components/DataMenu.svelte`, `src/lib/components/HistoryEditForm.svelte`
+- `src/lib/stores/picker.svelte.ts`: tambah `importMembers`, `restoreBackup`,
+  `updateHistoryEntry`
+
 ## [Unreleased] — 2026-08-16 (3)
 
 ### Migrasi ke SvelteKit + Svelte 5 + Tailwind CSS 4

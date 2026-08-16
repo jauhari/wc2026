@@ -22,11 +22,19 @@
   import Badge from "$lib/components/Badge.svelte";
   import Button from "$lib/components/Button.svelte";
   import ConfettiBurst from "$lib/components/ConfettiBurst.svelte";
+  import DataMenu from "$lib/components/DataMenu.svelte";
   import EmptyState from "$lib/components/EmptyState.svelte";
+  import HistoryEditForm from "$lib/components/HistoryEditForm.svelte";
   import MemberForm from "$lib/components/MemberForm.svelte";
   import Modal from "$lib/components/Modal.svelte";
   import PickerTimeline from "$lib/components/PickerTimeline.svelte";
   import { playPickerFanfare, playPickerTick } from "$lib/audio/picker-sounds";
+  import {
+    csvToMemberInputs,
+    downloadFile,
+    fileDateStamp,
+    membersToCsv,
+  } from "$lib/data-io";
   import { picker } from "$lib/stores/picker.svelte";
   import { theme } from "$lib/stores/theme.svelte";
   import {
@@ -36,7 +44,13 @@
     SITE_TAGLINE,
     SITE_URL,
   } from "$lib/constants";
-  import { parseMemberNames, type MemberInput, type PickerMember } from "$lib/types";
+  import {
+    parseMemberNames,
+    parsePickerState,
+    type MemberInput,
+    type PickerHistoryEntry,
+    type PickerMember,
+  } from "$lib/types";
   import { cn } from "$lib/utils";
 
   const SPIN_DURATION_MS = 2400;
@@ -59,6 +73,8 @@
   let quickAddOpen = $state(false);
   let formOpen = $state(false);
   let editingMember = $state<PickerMember | null>(null);
+  let historyFormOpen = $state(false);
+  let editingHistoryEntry = $state<PickerHistoryEntry | null>(null);
   let spinning = $state(false);
   let displayName = $state<string | null>(null);
   let winner = $state<PickerMember | null>(null);
@@ -144,6 +160,90 @@
       picker.addMember(input);
     }
     formOpen = false;
+  }
+
+  function openEditHistoryForm(entry: PickerHistoryEntry) {
+    editingHistoryEntry = entry;
+    historyFormOpen = true;
+  }
+
+  function handleHistoryFormSubmit(input: {
+    pickedAt: number;
+    method: PickerHistoryEntry["method"];
+  }) {
+    if (!editingHistoryEntry) return;
+    picker.updateHistoryEntry(editingHistoryEntry.id, input);
+    historyFormOpen = false;
+  }
+
+  function handleExportJson() {
+    const payload = JSON.stringify(
+      {
+        members: picker.members,
+        history: picker.history,
+        exportedAt: new Date().toISOString(),
+      },
+      null,
+      2
+    );
+    downloadFile(
+      `random-picker-backup-${fileDateStamp()}.json`,
+      payload,
+      "application/json"
+    );
+    toast.success("Backup JSON diunduh");
+  }
+
+  function handleExportCsv() {
+    if (picker.members.length === 0) {
+      toast.error("Belum ada anggota untuk diekspor");
+      return;
+    }
+    const csv = membersToCsv(picker.members);
+    downloadFile(
+      `random-picker-anggota-${fileDateStamp()}.csv`,
+      csv,
+      "text/csv;charset=utf-8"
+    );
+    toast.success("Daftar anggota CSV diunduh");
+  }
+
+  async function handleImportJsonFile(file: File) {
+    try {
+      const text = await file.text();
+      const state = parsePickerState(text);
+      if (state.members.length === 0 && state.history.length === 0) {
+        toast.error("File JSON tidak valid atau kosong");
+        return;
+      }
+      if (
+        picker.members.length > 0 &&
+        !confirm(
+          `Timpa data saat ini dengan backup ini? (${state.members.length} anggota, ${state.history.length} riwayat). Tindakan ini tidak bisa dibatalkan.`
+        )
+      ) {
+        return;
+      }
+      picker.restoreBackup(state);
+      winner = null;
+      displayName = null;
+    } catch {
+      toast.error("Gagal membaca file JSON — pastikan file backup valid");
+    }
+  }
+
+  async function handleImportCsvFile(file: File) {
+    try {
+      const text = await file.text();
+      const inputs = csvToMemberInputs(text);
+      if (inputs.length === 0) {
+        toast.error("File CSV kosong atau format tidak dikenali");
+        return;
+      }
+      picker.importMembers(inputs);
+    } catch {
+      toast.error("Gagal membaca file CSV");
+    }
   }
 
   function handleClearMembers() {
@@ -235,6 +335,12 @@
       </p>
     </div>
     <div class="flex gap-2">
+      <DataMenu
+        onExportJson={handleExportJson}
+        onExportCsv={handleExportCsv}
+        onImportJson={handleImportJsonFile}
+        onImportCsv={handleImportCsvFile}
+      />
       <Button
         variant="outline"
         size="icon"
@@ -536,7 +642,11 @@ atau pisahkan dengan koma (No. HP &amp; posisi bisa diisi lewat Edit)"
           />
         {:else}
           <div class="max-h-[480px] overflow-y-auto pr-1">
-            <PickerTimeline history={picker.history} members={picker.members} />
+            <PickerTimeline
+              history={picker.history}
+              members={picker.members}
+              onEdit={openEditHistoryForm}
+            />
           </div>
         {/if}
 
@@ -568,6 +678,21 @@ atau pisahkan dengan koma (No. HP &amp; posisi bisa diisi lewat Edit)"
         member={editingMember}
         onSubmit={handleFormSubmit}
         onCancel={() => (formOpen = false)}
+      />
+    </Modal>
+  {/if}
+
+  {#if historyFormOpen && editingHistoryEntry}
+    <Modal
+      open={historyFormOpen}
+      onOpenChange={(v) => (historyFormOpen = v)}
+      title="Edit Pemenang"
+      description={`Ubah data pengundian untuk ${editingHistoryEntry.name}.`}
+    >
+      <HistoryEditForm
+        entry={editingHistoryEntry}
+        onSubmit={handleHistoryFormSubmit}
+        onCancel={() => (historyFormOpen = false)}
       />
     </Modal>
   {/if}

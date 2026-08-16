@@ -1,17 +1,20 @@
 <script lang="ts">
   import DicesIcon from "@lucide/svelte/icons/dices";
+  import PencilIcon from "@lucide/svelte/icons/pencil";
   import Wand2Icon from "@lucide/svelte/icons/wand-2";
 
   import type { PickerHistoryEntry, PickerMember } from "$lib/types";
   import Badge from "$lib/components/Badge.svelte";
+  import Button from "$lib/components/Button.svelte";
   import { cn } from "$lib/utils";
 
   interface Props {
     history: PickerHistoryEntry[];
     members: PickerMember[];
+    onEdit: (entry: PickerHistoryEntry) => void;
   }
 
-  let { history, members }: Props = $props();
+  let { history, members, onEdit }: Props = $props();
 
   const memberMap = $derived(new Map(members.map((m) => [m.id, m])));
   const ordered = $derived([...history].reverse());
@@ -42,14 +45,24 @@
         >
           <div class="flex flex-wrap items-center justify-between gap-2">
             <span class="font-semibold">{entry.name}</span>
-            <Badge variant="outline" class="shrink-0 gap-1 text-[10px]">
-              {#if entry.method === "manual"}
-                <Wand2Icon class="size-3" />
-              {:else}
-                <DicesIcon class="size-3" />
-              {/if}
-              {entry.method === "manual" ? "Manual" : "Acak"}
-            </Badge>
+            <div class="flex shrink-0 items-center gap-1">
+              <Badge variant="outline" class="gap-1 text-[10px]">
+                {#if entry.method === "manual"}
+                  <Wand2Icon class="size-3" />
+                {:else}
+                  <DicesIcon class="size-3" />
+                {/if}
+                {entry.method === "manual" ? "Manual" : "Acak"}
+              </Badge>
+              <Button
+                size="icon-sm"
+                variant="ghost"
+                aria-label={`Edit data ${entry.name}`}
+                onclick={() => onEdit(entry)}
+              >
+                <PencilIcon class="size-3.5" />
+              </Button>
+            </div>
           </div>
           {#if member?.position || member?.phone}
             <span class="text-xs text-muted-foreground">
@@ -60,6 +73,7 @@
             {new Date(entry.pickedAt).toLocaleString("id-ID", {
               day: "2-digit",
               month: "short",
+              year: "numeric",
               hour: "2-digit",
               minute: "2-digit",
               second: "2-digit",
