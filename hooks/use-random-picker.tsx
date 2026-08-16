@@ -9,6 +9,7 @@ import {
   PICKER_STORAGE_KEY,
   getRemainingMembers,
   parsePickerState,
+  type MemberInput,
   type PickerHistoryEntry,
   type PickerMember,
   type PickerState,
@@ -96,7 +97,7 @@ export function useRandomPicker() {
       const key = name.toLowerCase()
       if (existingKeys.has(key)) continue
       existingKeys.add(key)
-      added.push({ id: makeId(), name })
+      added.push({ id: makeId(), name, phone: "", position: "" })
     }
     if (added.length === 0) {
       toast.info("Semua nama sudah ada di daftar")
@@ -104,6 +105,40 @@ export function useRandomPicker() {
     }
     writeState({ ...prev, members: [...prev.members, ...added] })
     toast.success(`${added.length} anggota ditambahkan`)
+  }, [])
+
+  const addMember = React.useCallback((input: MemberInput) => {
+    const name = input.name.trim()
+    if (!name) return
+    const prev = readState()
+    const member: PickerMember = {
+      id: makeId(),
+      name,
+      phone: input.phone?.trim() ?? "",
+      position: input.position?.trim() ?? "",
+    }
+    writeState({ ...prev, members: [...prev.members, member] })
+    toast.success(`${member.name} ditambahkan ke daftar anggota`)
+  }, [])
+
+  const updateMember = React.useCallback((id: string, input: MemberInput) => {
+    const name = input.name.trim()
+    if (!name) return
+    const prev = readState()
+    writeState({
+      ...prev,
+      members: prev.members.map((m) =>
+        m.id === id
+          ? {
+              ...m,
+              name,
+              phone: input.phone?.trim() ?? "",
+              position: input.position?.trim() ?? "",
+            }
+          : m
+      ),
+    })
+    toast.success("Data anggota diperbarui")
   }, [])
 
   const removeMember = React.useCallback((id: string) => {
@@ -158,6 +193,8 @@ export function useRandomPicker() {
     muted,
     setMuted,
     addMembers,
+    addMember,
+    updateMember,
     removeMember,
     clearMembers,
     resetQueue,

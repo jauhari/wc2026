@@ -5,7 +5,9 @@ import {
   CheckIcon,
   DicesIcon,
   HistoryIcon,
+  ListPlusIcon,
   PartyPopperIcon,
+  PencilIcon,
   PlusIcon,
   RotateCcwIcon,
   ShuffleIcon,
@@ -14,20 +16,33 @@ import {
   Volume2Icon,
   VolumeXIcon,
   Wand2Icon,
-  XIcon,
 } from "lucide-react"
 import { toast } from "sonner"
 
 import { ConfettiBurst } from "@/components/confetti-burst"
+import { MemberFormSheet } from "@/components/member-form-sheet"
+import { PickerTimeline } from "@/components/picker-timeline"
 import { useRandomPicker } from "@/hooks/use-random-picker"
 import { playPickerFanfare, playPickerTick } from "@/lib/audio/picker-sounds"
-import { parseMemberNames, type PickerMember } from "@/lib/random-picker"
+import {
+  parseMemberNames,
+  type MemberInput,
+  type PickerMember,
+} from "@/lib/random-picker"
 import { cn } from "@/lib/utils"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Empty, EmptyDescription, EmptyTitle } from "@/components/ui/empty"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
 
 const SPIN_DURATION_MS = 2400
 
@@ -40,6 +55,8 @@ export function RandomPickerClient() {
     muted,
     setMuted,
     addMembers,
+    addMember,
+    updateMember,
     removeMember,
     clearMembers,
     resetQueue,
@@ -48,6 +65,12 @@ export function RandomPickerClient() {
   } = useRandomPicker()
 
   const [bulkInput, setBulkInput] = React.useState("")
+  const [quickAddOpen, setQuickAddOpen] = React.useState(false)
+  const [formOpen, setFormOpen] = React.useState(false)
+  const [formKey, setFormKey] = React.useState(0)
+  const [editingMember, setEditingMember] = React.useState<PickerMember | null>(
+    null
+  )
   const [spinning, setSpinning] = React.useState(false)
   const [displayName, setDisplayName] = React.useState<string | null>(null)
   const [winner, setWinner] = React.useState<PickerMember | null>(null)
@@ -121,6 +144,26 @@ export function RandomPickerClient() {
     setBulkInput("")
   }
 
+  const openCreateSheet = () => {
+    setEditingMember(null)
+    setFormKey((k) => k + 1)
+    setFormOpen(true)
+  }
+
+  const openEditSheet = (member: PickerMember) => {
+    setEditingMember(member)
+    setFormKey((k) => k + 1)
+    setFormOpen(true)
+  }
+
+  const handleFormSubmit = (input: MemberInput) => {
+    if (editingMember) {
+      updateMember(editingMember.id, input)
+    } else {
+      addMember(input)
+    }
+  }
+
   const handleClearMembers = () => {
     if (members.length === 0) return
     if (
@@ -138,9 +181,7 @@ export function RandomPickerClient() {
   const handleResetQueue = () => {
     if (history.length === 0) return
     if (
-      !window.confirm(
-        "Reset antrian sukses? Semua anggota akan bisa dipilih lagi."
-      )
+      !window.confirm("Reset antrian sukses? Semua anggota akan bisa dipilih lagi.")
     )
       return
     resetQueue()
@@ -174,103 +215,120 @@ export function RandomPickerClient() {
         picked={history.length}
       />
 
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_360px]">
-        <Card className="relative overflow-hidden">
-          <ConfettiBurst trigger={confettiTrigger} />
-          <CardContent className="flex flex-col items-center gap-6 py-10">
-            <div
-              key={revealKey}
+      <Card className="relative overflow-hidden">
+        <ConfettiBurst trigger={confettiTrigger} />
+        <CardContent className="flex flex-col items-center gap-6 py-10">
+          <div
+            key={revealKey}
+            className={cn(
+              "relative flex min-h-28 w-full max-w-md flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed px-6 py-8 text-center",
+              winner &&
+                !spinning &&
+                "animate-picker-winner-pop border-primary bg-primary/5",
+              spinning && "animate-picker-shake border-primary/50 bg-muted/50",
+              !winner && !spinning && "border-border bg-muted/30"
+            )}
+          >
+            {winner && !spinning && (
+              <PartyPopperIcon className="size-6 text-primary" aria-hidden />
+            )}
+            <span
               className={cn(
-                "relative flex min-h-28 w-full max-w-md flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed px-6 py-8 text-center",
-                winner &&
-                  !spinning &&
-                  "animate-picker-winner-pop border-primary bg-primary/5",
-                spinning &&
-                  "animate-picker-shake border-primary/50 bg-muted/50",
-                !winner && !spinning && "border-border bg-muted/30"
+                "font-heading text-2xl font-bold tracking-tight break-words sm:text-3xl",
+                spinning && "text-muted-foreground blur-[0.5px]",
+                winner && !spinning && "text-primary"
               )}
             >
-              {winner && !spinning && (
-                <PartyPopperIcon className="size-6 text-primary" aria-hidden />
+              {stageText}
+            </span>
+            {winner && !spinning && (
+              <Badge variant="default" className="gap-1">
+                <CheckIcon className="size-3" />
+                Terpilih #{history.length}
+              </Badge>
+            )}
+          </div>
+
+          <div className="flex flex-wrap items-center justify-center gap-2">
+            <Button
+              size="lg"
+              onClick={handleRandomPick}
+              disabled={spinning || remaining.length === 0}
+              className={cn(
+                "gap-2 px-6 text-base",
+                !spinning && remaining.length > 0 && "animate-picker-glow-pulse"
               )}
-              <span
-                className={cn(
-                  "font-heading text-2xl font-bold tracking-tight break-words sm:text-3xl",
-                  spinning && "text-muted-foreground blur-[0.5px]",
-                  winner && !spinning && "text-primary"
-                )}
-              >
-                {stageText}
-              </span>
-              {winner && !spinning && (
-                <Badge variant="default" className="gap-1">
-                  <CheckIcon className="size-3" />
-                  Terpilih #{history.length}
-                </Badge>
-              )}
+            >
+              <ShuffleIcon className="size-4" />
+              {spinning ? "Mengacak…" : "Acak Sekarang"}
+            </Button>
+            <Button
+              variant="outline"
+              onClick={handleUndo}
+              disabled={spinning || history.length === 0}
+              className="gap-1.5"
+            >
+              <RotateCcwIcon className="size-4" />
+              Batalkan Terakhir
+            </Button>
+          </div>
+
+          <p className="text-sm text-muted-foreground">
+            {remaining.length} dari {members.length} anggota tersisa untuk diacak.
+          </p>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardContent className="p-0">
+          <Tabs defaultValue="members" className="gap-0">
+            <div className="border-b px-3 pt-3">
+              <TabsList className="w-full">
+                <TabsTrigger value="members" className="gap-1.5">
+                  <UsersIcon className="size-4" />
+                  Anggota
+                  <CountBadge count={members.length} />
+                </TabsTrigger>
+                <TabsTrigger value="timeline" className="gap-1.5">
+                  <HistoryIcon className="size-4" />
+                  Timeline
+                  <CountBadge count={history.length} />
+                </TabsTrigger>
+              </TabsList>
             </div>
 
-            <div className="flex flex-wrap items-center justify-center gap-2">
-              <Button
-                size="lg"
-                onClick={handleRandomPick}
-                disabled={spinning || remaining.length === 0}
-                className={cn(
-                  "gap-2 px-6 text-base",
-                  !spinning &&
-                    remaining.length > 0 &&
-                    "animate-picker-glow-pulse"
-                )}
-              >
-                <ShuffleIcon className="size-4" />
-                {spinning ? "Mengacak…" : "Acak Sekarang"}
-              </Button>
-              <Button
-                variant="outline"
-                onClick={handleUndo}
-                disabled={spinning || history.length === 0}
-                className="gap-1.5"
-              >
-                <RotateCcwIcon className="size-4" />
-                Batalkan Terakhir
-              </Button>
-            </div>
-
-            <p className="text-sm text-muted-foreground">
-              {remaining.length} dari {members.length} anggota tersisa untuk
-              diacak.
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-0">
-            <Tabs defaultValue="members" className="gap-0">
-              <div className="border-b px-3 pt-3">
-                <TabsList className="w-full">
-                  <TabsTrigger value="members" className="gap-1.5">
-                    <UsersIcon className="size-4" />
-                    Anggota
-                    <CountBadge count={members.length} />
-                  </TabsTrigger>
-                  <TabsTrigger value="queue" className="gap-1.5">
-                    <HistoryIcon className="size-4" />
-                    Antrian Sukses
-                    <CountBadge count={history.length} />
-                  </TabsTrigger>
-                </TabsList>
+            <TabsContent value="members" className="flex flex-col gap-3 p-3">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <p className="text-sm text-muted-foreground">
+                  Kelola daftar anggota — tambah, ubah, atau hapus.
+                </p>
+                <div className="flex gap-2">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="gap-1.5"
+                    onClick={() => setQuickAddOpen((v) => !v)}
+                  >
+                    <ListPlusIcon className="size-4" />
+                    Tambah Cepat
+                  </Button>
+                  <Button size="sm" className="gap-1.5" onClick={openCreateSheet}>
+                    <PlusIcon className="size-4" />
+                    Tambah Anggota
+                  </Button>
+                </div>
               </div>
 
-              <TabsContent value="members" className="flex flex-col gap-3 p-3">
+              {quickAddOpen && (
                 <form
                   onSubmit={handleAddMembers}
-                  className="flex flex-col gap-2"
+                  className="flex flex-col gap-2 rounded-lg border p-3"
                 >
                   <textarea
                     value={bulkInput}
                     onChange={(e) => setBulkInput(e.target.value)}
                     placeholder={
-                      "Tambah anggota — satu nama per baris\natau pisahkan dengan koma"
+                      "Tambah banyak nama sekaligus — satu nama per baris\natau pisahkan dengan koma (No. HP & posisi bisa diisi lewat Edit)"
                     }
                     rows={2}
                     className="w-full min-w-0 resize-none rounded-lg border border-input bg-transparent px-2.5 py-1.5 text-sm outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 dark:bg-input/30"
@@ -280,159 +338,155 @@ export function RandomPickerClient() {
                     Tambah
                   </Button>
                 </form>
+              )}
 
-                {members.length === 0 ? (
-                  <Empty className="min-h-40 rounded-lg border border-dashed">
-                    <EmptyTitle>Belum ada anggota</EmptyTitle>
-                    <EmptyDescription>
-                      Tambahkan nama anggota di atas untuk mulai memilih
-                      pemenang.
-                    </EmptyDescription>
-                  </Empty>
-                ) : (
-                  <div className="flex max-h-[420px] flex-col gap-1.5 overflow-y-auto pr-1">
-                    {members.map((member) => {
-                      const entry = history.find(
-                        (h) => h.memberId === member.id
-                      )
-                      return (
-                        <div
-                          key={member.id}
-                          className={cn(
-                            "flex items-center gap-2 rounded-lg border px-2.5 py-2 text-sm",
-                            entry
-                              ? "border-border bg-muted/40"
-                              : "border-border"
-                          )}
-                        >
-                          <span
-                            className={cn(
-                              "min-w-0 flex-1 truncate font-medium",
-                              entry &&
-                                "text-muted-foreground line-through decoration-1"
-                            )}
-                          >
-                            {member.name}
-                          </span>
-                          {entry ? (
-                            <Badge
-                              variant="secondary"
-                              className="shrink-0 gap-1"
-                            >
-                              {entry.method === "manual" ? (
-                                <Wand2Icon className="size-3" />
+              {members.length === 0 ? (
+                <Empty className="min-h-40 rounded-lg border border-dashed">
+                  <EmptyTitle>Belum ada anggota</EmptyTitle>
+                  <EmptyDescription>
+                    Klik &quot;Tambah Anggota&quot; untuk mulai mengisi daftar.
+                  </EmptyDescription>
+                </Empty>
+              ) : (
+                <div className="max-h-[420px] overflow-y-auto rounded-lg border">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Nama</TableHead>
+                        <TableHead>No. HP</TableHead>
+                        <TableHead>Posisi</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead className="text-right">Aksi</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {members.map((member) => {
+                        const entry = history.find(
+                          (h) => h.memberId === member.id
+                        )
+                        return (
+                          <TableRow key={member.id}>
+                            <TableCell className="font-medium">
+                              {member.name}
+                            </TableCell>
+                            <TableCell className="text-muted-foreground">
+                              {member.phone || "—"}
+                            </TableCell>
+                            <TableCell className="text-muted-foreground">
+                              {member.position || "—"}
+                            </TableCell>
+                            <TableCell>
+                              {entry ? (
+                                <Badge variant="secondary" className="gap-1">
+                                  {entry.method === "manual" ? (
+                                    <Wand2Icon className="size-3" />
+                                  ) : (
+                                    <ShuffleIcon className="size-3" />
+                                  )}
+                                  #
+                                  {history.findIndex((h) => h.id === entry.id) +
+                                    1}
+                                </Badge>
                               ) : (
-                                <ShuffleIcon className="size-3" />
+                                <Badge
+                                  variant="outline"
+                                  className="text-muted-foreground"
+                                >
+                                  Belum dipilih
+                                </Badge>
                               )}
-                              #{history.findIndex((h) => h.id === entry.id) + 1}
-                            </Badge>
-                          ) : (
-                            <Button
-                              size="sm"
-                              variant="secondary"
-                              className="h-7 shrink-0 gap-1 px-2 text-xs"
-                              disabled={spinning}
-                              onClick={() => handleManualPick(member)}
-                            >
-                              <Wand2Icon className="size-3.5" />
-                              Pilih
-                            </Button>
-                          )}
-                          <Button
-                            variant="ghost"
-                            size="icon-sm"
-                            aria-label={`Hapus ${member.name}`}
-                            className="shrink-0 text-muted-foreground hover:text-destructive"
-                            onClick={() => removeMember(member.id)}
-                          >
-                            <XIcon className="size-3.5" />
-                          </Button>
-                        </div>
-                      )
-                    })}
-                  </div>
-                )}
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex justify-end gap-1">
+                                {!entry && (
+                                  <Button
+                                    size="icon-sm"
+                                    variant="secondary"
+                                    disabled={spinning}
+                                    aria-label={`Pilih ${member.name}`}
+                                    onClick={() => handleManualPick(member)}
+                                  >
+                                    <Wand2Icon className="size-3.5" />
+                                  </Button>
+                                )}
+                                <Button
+                                  size="icon-sm"
+                                  variant="ghost"
+                                  aria-label={`Edit ${member.name}`}
+                                  onClick={() => openEditSheet(member)}
+                                >
+                                  <PencilIcon className="size-3.5" />
+                                </Button>
+                                <Button
+                                  size="icon-sm"
+                                  variant="ghost"
+                                  aria-label={`Hapus ${member.name}`}
+                                  className="text-muted-foreground hover:text-destructive"
+                                  onClick={() => removeMember(member.id)}
+                                >
+                                  <Trash2Icon className="size-3.5" />
+                                </Button>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        )
+                      })}
+                    </TableBody>
+                  </Table>
+                </div>
+              )}
 
-                {members.length > 0 && (
-                  <Button
-                    variant="destructive"
-                    size="sm"
-                    className="gap-1.5 self-start"
-                    onClick={handleClearMembers}
-                  >
-                    <Trash2Icon className="size-3.5" />
-                    Hapus Semua
-                  </Button>
-                )}
-              </TabsContent>
+              {members.length > 0 && (
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  className="gap-1.5 self-start"
+                  onClick={handleClearMembers}
+                >
+                  <Trash2Icon className="size-3.5" />
+                  Hapus Semua
+                </Button>
+              )}
+            </TabsContent>
 
-              <TabsContent value="queue" className="flex flex-col gap-3 p-3">
-                {history.length === 0 ? (
-                  <Empty className="min-h-40 rounded-lg border border-dashed">
-                    <EmptyTitle>Antrian sukses masih kosong</EmptyTitle>
-                    <EmptyDescription>
-                      Pemenang yang berhasil dipilih (acak maupun manual) akan
-                      muncul di sini, berurutan sesuai waktu.
-                    </EmptyDescription>
-                  </Empty>
-                ) : (
-                  <div className="flex max-h-[420px] flex-col gap-1.5 overflow-y-auto pr-1">
-                    {[...history].reverse().map((entry, i) => {
-                      const order = history.length - i
-                      return (
-                        <div
-                          key={entry.id}
-                          className="flex items-center gap-2.5 rounded-lg border border-primary/20 bg-primary/5 px-2.5 py-2 text-sm"
-                        >
-                          <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground tabular-nums">
-                            {order}
-                          </span>
-                          <span className="min-w-0 flex-1 truncate font-medium">
-                            {entry.name}
-                          </span>
-                          <Badge
-                            variant="outline"
-                            className="shrink-0 gap-1 text-[10px]"
-                          >
-                            {entry.method === "manual" ? (
-                              <Wand2Icon className="size-3" />
-                            ) : (
-                              <DicesIcon className="size-3" />
-                            )}
-                            {entry.method === "manual" ? "Manual" : "Acak"}
-                          </Badge>
-                          <span className="shrink-0 text-xs text-muted-foreground tabular-nums">
-                            {new Date(entry.pickedAt).toLocaleTimeString(
-                              "id-ID",
-                              {
-                                hour: "2-digit",
-                                minute: "2-digit",
-                                second: "2-digit",
-                              }
-                            )}
-                          </span>
-                        </div>
-                      )
-                    })}
-                  </div>
-                )}
+            <TabsContent value="timeline" className="flex flex-col gap-3 p-3">
+              {history.length === 0 ? (
+                <Empty className="min-h-40 rounded-lg border border-dashed">
+                  <EmptyTitle>Timeline masih kosong</EmptyTitle>
+                  <EmptyDescription>
+                    Pemenang yang berhasil dipilih (acak maupun manual) akan
+                    tercatat di sini secara berurutan, lengkap dengan waktu.
+                  </EmptyDescription>
+                </Empty>
+              ) : (
+                <div className="max-h-[480px] overflow-y-auto pr-1">
+                  <PickerTimeline history={history} members={members} />
+                </div>
+              )}
 
-                {history.length > 0 && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="gap-1.5 self-start"
-                    onClick={handleResetQueue}
-                  >
-                    <RotateCcwIcon className="size-3.5" />
-                    Reset Antrian
-                  </Button>
-                )}
-              </TabsContent>
-            </Tabs>
-          </CardContent>
-        </Card>
-      </div>
+              {history.length > 0 && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="gap-1.5 self-start"
+                  onClick={handleResetQueue}
+                >
+                  <RotateCcwIcon className="size-3.5" />
+                  Reset Antrian
+                </Button>
+              )}
+            </TabsContent>
+          </Tabs>
+        </CardContent>
+      </Card>
+
+      <MemberFormSheet
+        key={formKey}
+        open={formOpen}
+        onOpenChange={setFormOpen}
+        member={editingMember}
+        onSubmit={handleFormSubmit}
+      />
 
       {!ready && (
         <p className="text-center text-xs text-muted-foreground">

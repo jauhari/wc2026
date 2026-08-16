@@ -2,6 +2,28 @@
 
 Semua perubahan penting pada project ini dicatat di sini.
 
+## [Unreleased] — 2026-08-16
+
+### Random Picker: CRUD anggota & timeline
+
+- **Data anggota diperluas** — tiap anggota kini punya Nama, No. HP, dan
+  Posisi (bukan cuma nama)
+- **CRUD lengkap** di tab Anggota:
+  - Tambah anggota detail (Nama/HP/Posisi) lewat sheet form, atau Tambah
+    Cepat (paste banyak nama sekaligus, HP/posisi bisa diisi belakangan)
+  - Edit anggota (ikon pensil) — ubah nama/HP/posisi kapan saja
+  - Hapus per anggota atau hapus semua
+  - Daftar anggota ditampilkan sebagai tabel (Nama, No. HP, Posisi, Status,
+    Aksi) bukan list sederhana
+- **Timeline pengundian** — tab "Antrian Sukses" diganti jadi **Timeline**
+  bergaya linimasa (node bernomor + garis penghubung), menampilkan posisi/HP
+  anggota dan waktu lengkap (tanggal + jam) tiap kali ada yang terpilih
+- File baru: `components/member-form-sheet.tsx`, `components/picker-timeline.tsx`
+- `lib/random-picker.ts`: tipe `PickerMember` tambah `phone`/`position`,
+  migrasi otomatis data lama yang belum punya field ini
+- `hooks/use-random-picker.tsx`: tambah `addMember`/`updateMember` untuk
+  create/update terstruktur
+
 ## [Unreleased] — 2026-08-15
 
 ### Pivot: Random Picker jadi aplikasi utama

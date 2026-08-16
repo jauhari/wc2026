@@ -1,6 +1,16 @@
 export interface PickerMember {
   id: string
   name: string
+  /** Nomor HP — opsional. */
+  phone: string
+  /** Posisi/jabatan — opsional. */
+  position: string
+}
+
+export interface MemberInput {
+  name: string
+  phone?: string
+  position?: string
 }
 
 export type PickMethod = "random" | "manual"
@@ -35,6 +45,16 @@ function isMember(value: unknown): value is PickerMember {
   )
 }
 
+/** Normalisasi entri anggota lama (tanpa phone/position) dari localStorage. */
+function normalizeMember(value: PickerMember): PickerMember {
+  return {
+    id: value.id,
+    name: value.name,
+    phone: typeof value.phone === "string" ? value.phone : "",
+    position: typeof value.position === "string" ? value.position : "",
+  }
+}
+
 function isHistoryEntry(value: unknown): value is PickerHistoryEntry {
   return (
     !!value &&
@@ -54,7 +74,7 @@ export function parsePickerState(raw: string | null): PickerState {
     const parsed = JSON.parse(raw) as Partial<PickerState>
     return {
       members: Array.isArray(parsed.members)
-        ? parsed.members.filter(isMember)
+        ? parsed.members.filter(isMember).map(normalizeMember)
         : [],
       history: Array.isArray(parsed.history)
         ? parsed.history.filter(isHistoryEntry)
